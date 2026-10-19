@@ -59,12 +59,13 @@ Flujo de una petición: **ruta → controlador → servicio → modelo** y de vu
 ## Aporte de cada integrante
 
 | Integrante | Qué hizo (archivos / pasos) |
+|---|---|
 | Esteban Recalde | Creo el repositorio en github. Definió el tema y los datos en cada modelo (data/cartas.json, src/models/carta.model.js: campos name, expansion, rarity, price, stock). Tanmbién hizo las validaciones y el CRUD del servicio.|
-| Nicolás Zurita | |
-| Jardel Maza | |
+| Nicolás Zurita |   |
+| Jardel Maza | Redactó la propuesta del proyecto en `PROPUESTA.md` y diagramó el mapa de arquitectura frontend-backend en `mapa.png`. Completó la documentación en `README.md`  |
 
 ## Declaración de uso de IA
 
 - Herramienta(s) usada(s): Claude (o «No se usó IA»)
-- Para qué la usamos (consultar, depurar, explicar un error…): La usamos para definir mejor las validaciones, 
-- Qué verificamos o corregimos nosotros: En las validaciones verificamos que siga la estructura y el método dado por el ingeniero y que cumpla los objetivos, 
+- Para qué la usamos (consultar, depurar, explicar un error…): La usamos para definir mejor las validaciones, ademas de pedirle la estructura para la generacion del diagrama en mermamid.live
+- Qué verificamos o corregimos nosotros: En las validaciones verificamos que siga la estructura y el método dado por el ingeniero y que cumpla los objetivo.
