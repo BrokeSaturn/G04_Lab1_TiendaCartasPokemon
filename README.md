@@ -6,12 +6,12 @@
 |---|---|
 | Grupo | G05 |
 | Emprendimiento | Tienda online de cartas Pokémon |
-| Integrantes | 1. <Jardel Maza> 2. <Esteban Recalde> 3. <Nicolás Zurita> |
+| Integrantes | 1. Jardel Maza <br> 2. Esteban Recalde <br> 3. Nicolás Zurita |
 | NRC | 36878|
 | Fecha | 19/10/2026 |
-| Repositorio | (enlace) |
+| Repositorio | https://github.com/BrokeSaturn/G05_Lab1_TiendaCartasPokemon |
 
-## Cómo ejecutar
+## Cómo ejecutar  
 
 ```bash
 npm install
