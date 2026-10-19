@@ -28,7 +28,7 @@ const validate = (data, { partial = false } = {}) => {
 // ✅ Ya resuelto: úsalo como guía
 const list = () => Carta.readAll();
 
-// ✅ Ya resuelto
+// ✅ Ya resuelto 
 const getById = async (id) => {
   const item = (await Carta.readAll()).find((p) => p.id === id);
   if (!item) throw new HttpError(404, "Carta no encontrada");
