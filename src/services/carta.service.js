@@ -1,4 +1,4 @@
-const Carta = require("../models/Carta.model");
+const Carta = require("../models/carta.model");
 const HttpError = require("../utils/httpError");
 
 // SERVICIO: reglas de negocio y acceso a datos a través del modelo.
@@ -9,7 +9,19 @@ const HttpError = require("../utils/httpError");
 // partial = true en PUT: valida solo los campos que llegan.
 // TODO Paso 1: al menos 2 validaciones de TU entidad.
 const validate = (data, { partial = false } = {}) => {
-  // Ejemplo: if (typeof data.name !== "string" || data.name.trim().length < 3) return "name ...";
+ const has = (k) => data[k] !== undefined;
+  if (!partial || has("name")) {
+    if (typeof data.name !== "string" || data.name.trim().length < 3)
+      return "El nombre es obligatorio y debe tener al menos 3 caracteres";
+  }
+  if (!partial || has("price")) {
+    if (typeof data.price !== "number" || data.price < 0)
+      return "El precio debe ser un número mayor o igual a 0";
+  }
+  if (!partial || has("stock")) {
+    if (!Number.isInteger(data.stock) || data.stock < 0)
+      return "El stock debe ser un número entero mayor o igual a 0";
+  }
   return null;
 };
 
@@ -25,17 +37,34 @@ const getById = async (id) => {
 
 // TODO Paso 2: valida (400), genera el id (máximo + 1), agrega el registro con carta.pick, guarda y devuélvelo
 const create = async (data) => {
-  throw new HttpError(501, "create() pendiente en el servicio");
+  const error = validate(data);
+  if (error) throw new HttpError(400, error);
+  const items = await Carta.readAll();
+  const id = items.length ? Math.max(...items.map((c) => c.id)) + 1 : 1;
+  const item = { id, ...Carta.pick(data) };
+  items.push(item);
+  await Carta.writeAll(items);
+  return item;
 };
 
 // TODO Paso 2: valida con { partial: true } (400); si el id no existe lanza 404; mezcla los campos, guarda y devuélvelo
 const update = async (id, data) => {
-  throw new HttpError(501, "update() pendiente en el servicio");
+   const error = validate(data, { partial: true });
+  if (error) throw new HttpError(400, error);
+  const items = await Carta.readAll();
+  const index = items.findIndex((c) => c.id === id);
+  if (index === -1) throw new HttpError(404, "Carta no encontrada");
+  items[index] = { ...items[index], ...Carta.pick(data) };
+  await Carta.writeAll(items);
+  return items[index];
 };
 
 // TODO Paso 2: elimina por id; si no existía lanza 404
 const remove = async (id) => {
-  throw new HttpError(501, "remove() pendiente en el servicio");
+   const items = await Carta.readAll();
+  const rest = items.filter((c) => c.id !== id);
+  if (rest.length === items.length) throw new HttpError(404, "Carta no encontrada");
+  await Carta.writeAll(rest);
 };
 
 module.exports = { list, getById, create, update, remove };

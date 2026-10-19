@@ -1,5 +1,5 @@
 const { Router } = require("express");
-const CartaRoutes = require("./Carta.routes");
+const CartaRoutes = require("./carta.routes");
 
 // Archivo principal de rutas: cada recurso se monta en su propio prefijo
 const router = Router();

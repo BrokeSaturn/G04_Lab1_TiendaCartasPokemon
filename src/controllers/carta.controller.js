@@ -1,4 +1,4 @@
-const cartaservice = require("../services/Carta.service");
+const cartaservice = require("../services/carta.service");
 const HttpError = require("../utils/httpError");
 
 // CONTROLADOR: lee la petición (params, body), llama al servicio y decide código + JSON.

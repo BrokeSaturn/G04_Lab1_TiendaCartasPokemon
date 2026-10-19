@@ -4,11 +4,11 @@
 
 | Dato | Valor |
 |---|---|
-| Grupo | GXX |
-| Emprendimiento | |
-| Integrantes | 1. <br> 2. <br> 3. <br> 4. |
-| NRC | |
-| Fecha | |
+| Grupo | G05 |
+| Emprendimiento | Tienda online de cartas Pokémon |
+| Integrantes | 1. <Jardel Maza> 2. <Esteban Recalde> 3. <Nicolás Zurita> |
+| NRC | 36878|
+| Fecha | 19/10/2026 |
 | Repositorio | (enlace) |
 
 ## Cómo ejecutar
@@ -19,7 +19,7 @@ cp .env.example .env      # en Windows: copy .env.example .env
 npm run dev               # http://localhost:3000
 ```
 
-Importa en Postman `postman/GXX_Lab1.postman_collection.json` y ejecuta **Run collection**.
+Importa en Postman `postman/G05_Lab1.postman_collection.json` y ejecuta **Run collection**.
 
 ## Estructura MVC en capas
 
@@ -44,25 +44,27 @@ Flujo de una petición: **ruta → controlador → servicio → modelo** y de vu
 
 | Verbo | Ruta | Acción | Éxito | Errores |
 |---|---|---|---|---|
-| GET | /api/... | Listar | 200 | — |
-| GET | /api/.../:id | Ver uno | 200 | 400, 404 |
-| POST | /api/... | Crear | 201 | 400 |
-| PUT | /api/.../:id | Actualizar | 200 | 400, 404 |
-| DELETE | /api/.../:id | Eliminar | 204 | 404 |
+| GET | /api/cartas | Listar | 200 | — |
+| GET | /api/cartas/:id | Ver uno | 200 | 400, 404 |
+| POST | /api/cartas | Crear | 201 | 400 |
+| PUT | /api/cartas/:id | Actualizar | 200 | 400, 404 |
+| DELETE | /api/cartas/:id | Eliminar | 204 | 404 |
 
 ## Validaciones del servicio
 
-1.
-2.
+1. El nombre es obligatorio y debe tener al menos 3 caracteres (400).
+2. El precio debe ser un número mayor o igual a 0 (400).
+3. El stock debe ser un entero mayor o igual a 0 (400).
 
 ## Aporte de cada integrante
 
 | Integrante | Qué hizo (archivos / pasos) |
-|---|---|
-| | |
+| Esteban Recalde | Creo el repositorio en github. Definió el tema y los datos en cada modelo (data/cartas.json, src/models/carta.model.js: campos name, expansion, rarity, price, stock). Tanmbién hizo las validaciones y el CRUD del servicio.|
+| Nicolás Zurita | |
+| Jardel Maza | |
 
 ## Declaración de uso de IA
 
-- Herramienta(s) usada(s): ___ (o «No se usó IA»)
-- Para qué la usamos (consultar, depurar, explicar un error…):
-- Qué verificamos o corregimos nosotros:
+- Herramienta(s) usada(s): Claude (o «No se usó IA»)
+- Para qué la usamos (consultar, depurar, explicar un error…): La usamos para definir mejor las validaciones, 
+- Qué verificamos o corregimos nosotros: En las validaciones verificamos que siga la estructura y el método dado por el ingeniero y que cumpla los objetivos, 
