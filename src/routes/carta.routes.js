@@ -10,4 +10,4 @@ router.get("/:id", CartaController.getById);
 
 // TODO Paso 2: agrega POST "/" → create, PUT "/:id" → update y DELETE "/:id" → remove
 
-module.exports = router;
+module.exports = router; 
