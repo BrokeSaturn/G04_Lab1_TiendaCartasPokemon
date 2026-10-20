@@ -1,5 +1,9 @@
 // Manejador de errores: 4 parámetros. Responde siempre en JSON.
 const errorHandler = (err, req, res, next) => {
+  //si ya se envian cabeceras, no se puede enviar otra respuesta
+  if (res.headersSent) {
+    return next(err);
+  }
   // TODO Paso 3:
   //  a) Si el body trae JSON mal formado (err.type === "entity.parse.failed") responde 400.
  if(err.type === "entity.parse.failed") {

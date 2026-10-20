@@ -31,7 +31,8 @@ const getById = async (req, res, next) => {
 // TODO Paso 2: POST / → llama a cartaservice.create(req.body ?? {}) y responde 201 con el registro
 const create = async (req, res, next) => {
   try {
-    res.status(201).json(await cartaService.create(req.body ?? {})); // 201 Created
+    const carta = await cartaservice.create(req.body ?? {});
+    res.status(201).json(carta); // 201 Created
   } catch (err) {
     next(err);
   }
@@ -40,7 +41,8 @@ const create = async (req, res, next) => {
 // TODO Paso 2: PUT /:id → llama a cartaservice.update(parseId(req), req.body ?? {}) y responde 200
 const update = async (req, res, next) => {
   try {
-    res.json(await cartaService.update(parseId(req), req.body ?? {})); // 200 OK
+    const carta = await cartaservice.update(parseId(req), req.body ?? {});
+    res.json(carta); // 200 OK
   } catch (err) {
     next(err);
   }
@@ -49,7 +51,7 @@ const update = async (req, res, next) => {
 // TODO Paso 2: DELETE /:id → llama a cartaservice.remove(parseId(req)) y responde 204 sin cuerpo (res.status(204).end())
 const remove = async (req, res, next) => {
   try {
-    await cartaService.remove(parseId(req));
+    await cartaservice.remove(parseId(req));
     res.status(204).end(); // 204 No Content
   } catch (err) {
     next(err);
