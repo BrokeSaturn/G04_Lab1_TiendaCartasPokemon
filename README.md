@@ -62,7 +62,7 @@ Flujo de una petición: **ruta → controlador → servicio → modelo** y de vu
 |---|---|
 | Esteban Recalde | Creo el repositorio en github. Definió el tema y los datos en cada modelo (data/cartas.json, src/models/carta.model.js: campos name, expansion, rarity, price, stock). Tanmbién hizo las validaciones y el CRUD del servicio.|
 | Nicolás Zurita | Actualizo el archivo carta.controller.js y las rutas para generar el crud, además de los middlewares errorHandler y logger. |
-| Jardel Maza | Redactó la propuesta del proyecto en `PROPUESTA.md` y diagramó el mapa de arquitectura frontend-backend en `mapa.png`. Completó la documentación en `README.md`  |
+| Jardel Maza | Redactó la propuesta del proyecto en `PROPUESTA.md`. Adaptó la colección de pruebas en Postman con los datos de cartas y endpoints, ademas ejecutó el Run collection generando la captura de 13/13 pruebas y diagramó el mapa de arquitectura frontend-backend en `mapa.png`. Completó la documentación en `README.md`  |
 
 ## Declaración de uso de IA
 
