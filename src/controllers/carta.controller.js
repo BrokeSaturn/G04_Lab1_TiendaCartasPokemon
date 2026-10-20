@@ -30,17 +30,32 @@ const getById = async (req, res, next) => {
 
 // TODO Paso 2: POST / → llama a cartaservice.create(req.body ?? {}) y responde 201 con el registro
 const create = async (req, res, next) => {
-  next(new HttpError(501, "create pendiente en el controlador"));
+  try {
+    const carta = await cartaservice.create(req.body ?? {});
+    res.status(201).json(carta); // 201 Created
+  } catch (err) {
+    next(err);
+  }
 };
 
 // TODO Paso 2: PUT /:id → llama a cartaservice.update(parseId(req), req.body ?? {}) y responde 200
 const update = async (req, res, next) => {
-  next(new HttpError(501, "update pendiente en el controlador"));
+  try {
+    const carta = await cartaservice.update(parseId(req), req.body ?? {});
+    res.json(carta); // 200 OK
+  } catch (err) {
+    next(err);
+  }
 };
 
 // TODO Paso 2: DELETE /:id → llama a cartaservice.remove(parseId(req)) y responde 204 sin cuerpo (res.status(204).end())
 const remove = async (req, res, next) => {
-  next(new HttpError(501, "remove pendiente en el controlador"));
+  try {
+    await cartaservice.remove(parseId(req));
+    res.status(204).end(); // 204 No Content
+  } catch (err) {
+    next(err);
+  }
 };
 
 module.exports = { list, getById, create, update, remove };
