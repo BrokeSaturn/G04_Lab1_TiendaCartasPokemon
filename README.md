@@ -4,12 +4,12 @@
 
 | Dato | Valor |
 |---|---|
-| Grupo | G05 |
+| Grupo | G04 |
 | Emprendimiento | Tienda online de cartas Pokémon |
 | Integrantes | 1. Jardel Maza <br> 2. Esteban Recalde <br> 3. Nicolás Zurita |
 | NRC | 36878|
 | Fecha | 19/10/2026 |
-| Repositorio | https://github.com/BrokeSaturn/G05_Lab1_TiendaCartasPokemon |
+| Repositorio | https://github.com/BrokeSaturn/G04_Lab1_TiendaCartasPokemon
 
 ## Cómo ejecutar  
 
@@ -19,7 +19,7 @@ cp .env.example .env      # en Windows: copy .env.example .env
 npm run dev               # http://localhost:3000
 ```
 
-Importa en Postman `postman/G05_Lab1.postman_collection.json` y ejecuta **Run collection**.
+Importa en Postman `postman/G04_Lab1.postman_collection.json` y ejecuta **Run collection**.
 
 ## Estructura MVC en capas
 

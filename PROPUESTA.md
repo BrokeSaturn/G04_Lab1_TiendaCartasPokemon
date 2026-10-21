@@ -1,4 +1,4 @@
-# Propuesta del emprendimiento · Grupo G05
+# Propuesta del emprendimiento · Grupo G04
 
 > Actividad 1 de la sesión 1. Complétala antes del Paso 1 del laboratorio.
 

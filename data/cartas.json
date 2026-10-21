@@ -36,5 +36,11 @@
     "name": "Capuchino",
     "price": 3.5,
     "stock": 15
+  },
+  {
+    "id": 6,
+    "name": "Capuchino",
+    "price": 3.5,
+    "stock": 15
   }
 ]

@@ -1,5 +1,5 @@
 {
-  "name": "g05-lab1-tiendapokemon",
+  "name": "g04-lab1-tiendapokemon",
   "version": "1.0.0",
   "description": "Laboratorio 1 · Desarrollo Web Avanzado · Mini-API MVC con CRUD para el emprendimiento del grupo",
   "main": "src/server.js",
