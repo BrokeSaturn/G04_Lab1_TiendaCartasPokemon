@@ -1,9 +1,11 @@
-const Carta = require("../models/carta.model");
+const prisma = require("../db/prisma");
 const HttpError = require("../utils/httpError");
 
 // SERVICIO: reglas de negocio y acceso a datos a través del modelo.
 // Lanza HttpError (400, 404) cuando una regla no se cumple. En el Lab 2 este archivo
 // usará Prisma; el controlador y las rutas no cambian.
+
+const FIELDS = ["name", "expansion", "rarity", "price", "stock"];
 
 // Devuelve un mensaje de error o null si los datos son válidos.
 // partial = true en PUT: valida solo los campos que llegan.
@@ -25,12 +27,15 @@ const validate = (data, { partial = false } = {}) => {
   return null;
 };
 
+const pick = (data) =>
+  Object.fromEntries(FIELDS.filter((k) => data[k] !== undefined).map((k) => [k, data[k]]));
+
 // ✅ Ya resuelto: úsalo como guía
-const list = () => Carta.readAll();
+const list = () => prisma.carta.findMany({ orderBy: { id: "asc" } });
 
 // ✅ Ya resuelto 
 const getById = async (id) => {
-  const item = (await Carta.readAll()).find((p) => p.id === id);
+  const item = await prisma.carta.findUnique({ where: { id } });
   if (!item) throw new HttpError(404, "Carta no encontrada");
   return item;
 };
@@ -39,32 +44,33 @@ const getById = async (id) => {
 const create = async (data) => {
   const error = validate(data);
   if (error) throw new HttpError(400, error);
-  const items = await Carta.readAll();
-  const id = items.length ? Math.max(...items.map((c) => c.id)) + 1 : 1;
-  const item = { id, ...Carta.pick(data) };
-  items.push(item);
-  await Carta.writeAll(items);
-  return item;
+  return prisma.carta.create({ data: pick(data) });
 };
 
 // TODO Paso 2: valida con { partial: true } (400); si el id no existe lanza 404; mezcla los campos, guarda y devuélvelo
 const update = async (id, data) => {
-   const error = validate(data, { partial: true });
+  const error = validate(data, { partial: true });
   if (error) throw new HttpError(400, error);
-  const items = await Carta.readAll();
-  const index = items.findIndex((c) => c.id === id);
-  if (index === -1) throw new HttpError(404, "Carta no encontrada");
-  items[index] = { ...items[index], ...Carta.pick(data) };
-  await Carta.writeAll(items);
-  return items[index];
+  await getById(id); // 404 si no existe
+  return prisma.carta.update({ where: { id }, data: pick(data) });
 };
 
 // TODO Paso 2: elimina por id; si no existía lanza 404
 const remove = async (id) => {
-   const items = await Carta.readAll();
-  const rest = items.filter((c) => c.id !== id);
-  if (rest.length === items.length) throw new HttpError(404, "Carta no encontrada");
-  await Carta.writeAll(rest);
+  const { count } = await prisma.carta.deleteMany({ where: { id } });
+  if (count === 0) throw new HttpError(404, "Carta no encontrada");
 };
 
-module.exports = { list, getById, create, update, remove };
+// TRANSACCIÓN: crea todas las cartas o ninguna. Dentro se usa tx, no prisma.
+const createMany = (items) =>
+  prisma.$transaction(async (tx) => {
+    const created = [];
+    for (const [i, data] of items.entries()) {
+      const error = validate(data ?? {});
+      if (error) throw new HttpError(400, `Ítem ${i + 1}: ${error}`); // → ROLLBACK
+      created.push(await tx.carta.create({ data: pick(data) }));
+    }
+    return created; 
+  });
+
+module.exports = { list, getById, create, update, remove, createMany };
