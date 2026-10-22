@@ -58,4 +58,14 @@ const remove = async (req, res, next) => {
   }
 };
 
-module.exports = { list, getById, create, update, remove };
+const createMany = async (req, res, next) => {
+  try {
+    if (!Array.isArray(req.body) || req.body.length === 0)
+      throw new HttpError(400, "El body debe ser un arreglo con al menos una carta");
+    res.status(201).json(await cartaservice.createMany(req.body));
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { list, getById, create, update, remove, createMany };
