@@ -1,8 +1,11 @@
 {
   "info": {
+    "_postman_id": "9dacf886-e7a5-4129-b2b3-7cc0e415e5d0",
     "name": "G04_Lab2 · Persistencia con Prisma",
     "description": "Colección del Laboratorio 2. Renombra GXX con tu número de grupo y /api/products con la ruta de tu entidad. Ejecuta con Run collection en orden. Requiere haber ejecutado npx prisma db seed (usa el registro «Café americano» para probar 409).",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "58684254",
+    "_collection_link": "https://go.postman.co/collection/58684254-9dacf886-e7a5-4129-b2b3-7cc0e415e5d0?source=collection_link"
   },
   "item": [
     {
@@ -16,8 +19,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"Arreglo desde PostgreSQL\", () => pm.expect(pm.response.json()).to.be.an(\"array\"));"
+                  "pm.test(\"200 OK\", () => pm.response.to.have.status(200));\npm.test(\"Arreglo desde PostgreSQL\", () => pm.expect(pm.response.json()).to.be.an(\"array\"));"
                 ]
               }
             }
@@ -26,16 +28,17 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/products",
+              "raw": "{{baseUrl}}/api/cartas",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "products"
+                "cartas"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "2. Crear",
@@ -45,10 +48,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"201 Created\", () => pm.response.to.have.status(201));",
-                  "const item = pm.response.json();",
-                  "pm.test(\"Tiene id y createdAt (los pone la BD)\", () => { pm.expect(item.id).to.exist; pm.expect(item.createdAt).to.exist; });",
-                  "pm.collectionVariables.set(\"id\", item.id);"
+                  "pm.test(\"201 Created\", () => pm.response.to.have.status(201));\nconst item = pm.response.json();\npm.test(\"Tiene id y createdAt (los pone la BD)\", () => { pm.expect(item.id).to.exist; pm.expect(item.createdAt).to.exist; });\npm.collectionVariables.set(\"id\", item.id);"
                 ]
               }
             }
@@ -61,26 +61,27 @@
                 "value": "application/json"
               }
             ],
-            "url": {
-              "raw": "{{baseUrl}}/api/products",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "products"
-              ]
-            },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Capuchino {{$timestamp}}\",\n  \"price\": 3.2,\n  \"stock\": 15,\n  \"category\": \"bebidas\"\n}",
+              "raw": "{ \n \"name\": \"Blastoise {{$timestamp}}\",\n \"expansion\": \"Base Set\",\n \"rarity\": \"Rare Holo\",\n \"price\": 180,\n \"stock\": 3 \n }\n",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/cartas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "cartas"
+              ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "3. Ver uno",
@@ -99,17 +100,18 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/products/{{id}}",
+              "raw": "{{baseUrl}}/api/cartas/{{id}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "products",
+                "cartas",
                 "{{id}}"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "4. Actualizar",
@@ -119,8 +121,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"Precio actualizado\", () => pm.expect(pm.response.json().price).to.eql(3.5));"
+                  "pm.test(\"200 OK\", () => pm.response.to.have.status(200));\npm.test(\"Precio actualizado\", () => pm.expect(pm.response.json().price).to.eql(3.5));"
                 ]
               }
             }
@@ -133,17 +134,6 @@
                 "value": "application/json"
               }
             ],
-            "url": {
-              "raw": "{{baseUrl}}/api/products/{{id}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "products",
-                "{{id}}"
-              ]
-            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"price\": 3.5\n}",
@@ -152,8 +142,20 @@
                   "language": "json"
                 }
               }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/cartas/{{id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "cartas",
+                "{{id}}"
+              ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "5. Datos inválidos (400)",
@@ -176,16 +178,6 @@
                 "value": "application/json"
               }
             ],
-            "url": {
-              "raw": "{{baseUrl}}/api/products",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "products"
-              ]
-            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"\",\n  \"price\": -1\n}",
@@ -194,8 +186,19 @@
                   "language": "json"
                 }
               }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/cartas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "cartas"
+              ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "6. Valor único repetido (409)",
@@ -218,26 +221,27 @@
                 "value": "application/json"
               }
             ],
-            "url": {
-              "raw": "{{baseUrl}}/api/products",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "products"
-              ]
-            },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Café americano\",\n  \"price\": 2.5\n}",
+              "raw": "{ \n  \"name\": \"Charizard\",\n  \"expansion\": \"Base Set\",\n  \"rarity\": \"Rare Holo\",\n  \"price\": 350.5,\n  \"stock\": 2\n}",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/cartas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "cartas"
+              ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "7. Inexistente (404)",
@@ -256,17 +260,18 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/products/99999",
+              "raw": "{{baseUrl}}/api/cartas/99999",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "products",
+                "cartas",
                 "99999"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "8. Eliminar",
@@ -285,17 +290,18 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/products/{{id}}",
+              "raw": "{{baseUrl}}/api/cartas/{{id}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "products",
+                "cartas",
                 "{{id}}"
               ]
             }
-          }
+          },
+          "response": []
         }
       ]
     },
@@ -310,8 +316,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
-                  "pm.collectionVariables.set(\"antes\", pm.response.json().length);"
+                  "pm.test(\"200 OK\", () => pm.response.to.have.status(200));\npm.collectionVariables.set(\"antes\", pm.response.json().length);"
                 ]
               }
             }
@@ -320,16 +325,17 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/products",
+              "raw": "{{baseUrl}}/api/cartas",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "products"
+                "cartas"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "10. Lote válido → COMMIT (201)",
@@ -339,9 +345,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"201 Created\", () => pm.response.to.have.status(201));",
-                  "pm.test(\"Creó 2 registros\", () => pm.expect(pm.response.json()).to.have.lengthOf(2));",
-                  "pm.collectionVariables.set(\"antes\", Number(pm.collectionVariables.get(\"antes\")) + 2);"
+                  "pm.test(\"201 Created\", () => pm.response.to.have.status(201));\npm.test(\"Creó 2 registros\", () => pm.expect(pm.response.json()).to.have.lengthOf(2));\npm.collectionVariables.set(\"antes\", Number(pm.collectionVariables.get(\"antes\")) + 2);"
                 ]
               }
             }
@@ -354,27 +358,28 @@
                 "value": "application/json"
               }
             ],
-            "url": {
-              "raw": "{{baseUrl}}/api/products/lote",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "products",
-                "lote"
-              ]
-            },
             "body": {
               "mode": "raw",
-              "raw": "[\n  {\n    \"name\": \"Lote A {{$timestamp}}\",\n    \"price\": 1.0,\n    \"stock\": 5\n  },\n  {\n    \"name\": \"Lote B {{$timestamp}}\",\n    \"price\": 2.0,\n    \"stock\": 5\n  }\n]",
+              "raw": "[\n  { \n    \"name\": \"Lote A {{$timestamp}}\", \n    \"price\": 1.0, \"stock\": 5 \n  },\n\n  { \n    \"name\": \"Lote B {{$timestamp}}\", \n    \"price\": 2.0, \"stock\": 5 \n  }\n]",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/cartas/lote",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "cartas",
+                "lote"
+              ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "11. Lote con un ítem inválido → ROLLBACK (400)",
@@ -397,27 +402,28 @@
                 "value": "application/json"
               }
             ],
-            "url": {
-              "raw": "{{baseUrl}}/api/products/lote",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "products",
-                "lote"
-              ]
-            },
             "body": {
               "mode": "raw",
-              "raw": "[\n  {\n    \"name\": \"Debe deshacerse {{$timestamp}}\",\n    \"price\": 1.0\n  },\n  {\n    \"name\": \"x\",\n    \"price\": -5\n  }\n]",
+              "raw": "[\n  { \n    \"name\": \"Debe deshacerse {{$timestamp}}\", \n    \"price\": 1.0, \n    \"stock\": 1 },\n  { \n    \"name\": \"x\", \n    \"price\": -5, \n    \"stock\": 1 \n  }\n]",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/cartas/lote",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "cartas",
+                "lote"
+              ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "12. Lote con nombre repetido → ROLLBACK (409)",
@@ -440,27 +446,28 @@
                 "value": "application/json"
               }
             ],
-            "url": {
-              "raw": "{{baseUrl}}/api/products/lote",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "products",
-                "lote"
-              ]
-            },
             "body": {
               "mode": "raw",
-              "raw": "[\n  {\n    \"name\": \"También se deshace {{$timestamp}}\",\n    \"price\": 1.0\n  },\n  {\n    \"name\": \"Café americano\",\n    \"price\": 2.5\n  }\n]",
+              "raw": "[\n  { \n    \"name\": \"También se deshace {{$timestamp}}\", \n    \"price\": 1.0, \n    \"stock\": 1 \n    },\n  { \n    \"name\": \"Charizard\", \n    \"price\": 2.5, \n    \"stock\": 1 \n    }\n]\n",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/cartas/lote",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "cartas",
+                "lote"
+              ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "13. Verificar ROLLBACK: nada quedó guardado",
@@ -470,8 +477,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"La cantidad es la misma que tras el COMMIT\", () => pm.expect(pm.response.json().length).to.eql(Number(pm.collectionVariables.get(\"antes\"))));",
-                  "pm.test(\"No existe el primer ítem de los lotes fallidos\", () => pm.expect(pm.response.json().some(p => p.name.startsWith(\"Debe deshacerse\") || p.name.startsWith(\"También se deshace\"))).to.be.false);"
+                  "pm.test(\"La cantidad es la misma que tras el COMMIT\", () => pm.expect(pm.response.json().length).to.eql(Number(pm.collectionVariables.get(\"antes\"))));\npm.test(\"No existe el primer ítem de los lotes fallidos\", () => pm.expect(pm.response.json().some(p => p.name.startsWith(\"Debe deshacerse\") || p.name.startsWith(\"También se deshace\"))).to.be.false);"
                 ]
               }
             }
@@ -480,16 +486,17 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/products",
+              "raw": "{{baseUrl}}/api/cartas",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "products"
+                "cartas"
               ]
             }
-          }
+          },
+          "response": []
         }
       ]
     }
