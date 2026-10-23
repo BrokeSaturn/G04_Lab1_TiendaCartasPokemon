@@ -1,0 +1,40 @@
+// Lab 2 · Persistencia con Prisma + PostgreSQL
+// Grupo: G04 · Emprendimiento: Tienda de cartas Pokémon
+// Tras cualquier cambio: npx prisma migrate dev --name <cambio> y luego npx prisma generate
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Prisma 7: la URL ya no va aquí; está en prisma.config.ts
+datasource db {
+  provider = "postgresql"
+}
+
+// TODO Paso 2: reemplaza Product por la entidad principal de tu Lab 1 (mismos campos)
+// Usa al menos: @id @default, @unique, un tipo @db.VarChar(n), un campo opcional (?) y @map/@@map
+model Carta {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique @db.VarChar(80)
+  expansion String?  @db.VarChar(60)
+  rarity    String   @default("Common") @db.VarChar(40) 
+  price     Float
+  stock     Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("cartas")
+}
+
+// TODO Paso 2: agrega la SEGUNDA entidad de tu modelo ER (4 o más campos).
+// Todavía SIN relación: las relaciones (@relation) se agregan en el Lab 3.
+model Cliente {
+  id        Int      @id @default(autoincrement())
+  nombre    String   @db.VarChar(100)
+  email     String   @unique @db.VarChar (120)
+  telefono  String?  @db.VarChar(15)
+  direccion String?  @db.VarChar(150)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("clientes")
+ }
