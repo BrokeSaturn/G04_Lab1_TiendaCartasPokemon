@@ -1,11 +1,11 @@
 {
   "info": {
-    "_postman_id": "9dacf886-e7a5-4129-b2b3-7cc0e415e5d0",
+    "_postman_id": "c9b6016b-3b77-4b96-83db-ed4a1e3b6860",
     "name": "G04_Lab2 · Persistencia con Prisma",
     "description": "Colección del Laboratorio 2. Renombra GXX con tu número de grupo y /api/products con la ruta de tu entidad. Ejecuta con Run collection en orden. Requiere haber ejecutado npx prisma db seed (usa el registro «Café americano» para probar 409).",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "58684254",
-    "_collection_link": "https://go.postman.co/collection/58684254-9dacf886-e7a5-4129-b2b3-7cc0e415e5d0?source=collection_link"
+    "_collection_link": "https://go.postman.co/collection/58684254-c9b6016b-3b77-4b96-83db-ed4a1e3b6860?source=collection_link"
   },
   "item": [
     {
