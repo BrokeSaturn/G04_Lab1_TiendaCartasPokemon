@@ -82,7 +82,7 @@ Flujo de una petición: **ruta → controlador → servicio → modelo** y de vu
 | Integrantes | 1. Jardel Maza <br> 2. Esteban Recalde <br> 3. Nicolas Zurita |
 | NRC | 36878 |
 | Fecha | 22/10/2026 |
-| Repositorio | https://github.com/BrokeSaturn/G05_Lab1_TiendaCaratasPokemon |
+| Repositorio | https://github.com/BrokeSaturn/G04_Lab1_TiendaCartasPokemon |
 
 ## Como ejecutar  
 
@@ -96,7 +96,7 @@ npx prisma db seed                         # Carga los datos iniciales
 npm run dev                                # http://localhost:3000
 ```
 
-Importa en Postman `postman/G05_Lab2.postman_collection.json` y ejecuta **Run collection**.
+Importa en Postman `postman/G04_Lab2.postman_collection.json` y ejecuta **Run collection**.
 
 ## Estructura MVC en capas
 
