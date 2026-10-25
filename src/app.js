@@ -1,8 +1,8 @@
 /*
- * Laboratorio 1 · Mini-API MVC con CRUD
+ * Laboratorio 3 · Relaciones, autenticación y despliegue
  * Desarrollo Web Avanzado (A0R04) · ESPE
  * Grupo: G04 · Emprendimiento: Tienda de cartas Pokémon
- * Integrantes: Jardel Maza, Esteban Recalde, Nicolás Zurita · NRC: 36878 · Fecha: 19/10/2026
+ * Integrantes: Jardel Maza, Esteban Recalde, Nicolás Zurita · NRC: 36878 · Fecha: 25/10/2026
  */
 const express = require("express");
 const routes = require("./routes");
