@@ -1,40 +1,83 @@
-// Lab 2 · Persistencia con Prisma + PostgreSQL
+// Lab 3 · Relaciones, mapeo y consultas avanzadas
 // Grupo: G04 · Emprendimiento: Tienda de cartas Pokémon
 // Tras cualquier cambio: npx prisma migrate dev --name <cambio> y luego npx prisma generate
-
 generator client {
   provider = "prisma-client-js"
 }
-
-// Prisma 7: la URL ya no va aquí; está en prisma.config.ts
+// Prisma 7: la URL no va aquí; está en prisma.config.ts
 datasource db {
   provider = "postgresql"
 }
-
-// TODO Paso 2: reemplaza Product por la entidad principal de tu Lab 1 (mismos campos)
-// Usa al menos: @id @default, @unique, un tipo @db.VarChar(n), un campo opcional (?) y @map/@@map
-model Carta {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique @db.VarChar(80)
-  expansion String?  @db.VarChar(60)
-  rarity    String   @default("Common") @db.VarChar(40) 
-  price     Float
-  stock     Int      @default(0)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@map("cartas")
+enum Role {
+  USER
+  ADMIN
 }
-
-// TODO Paso 2: agrega la SEGUNDA entidad de tu modelo ER (4 o más campos).
-// Todavía SIN relación: las relaciones (@relation) se agregan en el Lab 3.
+enum EstadoPedido {
+  PENDIENTE
+  PAGADO
+  ENVIADO
+  CANCELADO
+}
+// Usuario que inicia sesión con JWT
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique @db.VarChar(120)
+  password  String // hash de bcrypt, nunca la clave en texto plano
+  name      String   @db.VarChar(100)
+  role      Role     @default(USER)
+  createdAt DateTime @default(now()) @map("created_at")
+  cliente   Cliente? // 1:1 → el lado sin FK
+  @@map("users")
+}
+// Entidad del Lab 2, ahora relacionada
 model Cliente {
   id        Int      @id @default(autoincrement())
   nombre    String   @db.VarChar(100)
-  email     String   @unique @db.VarChar (120)
+  email     String   @unique @db.VarChar(120)
   telefono  String?  @db.VarChar(15)
   direccion String?  @db.VarChar(150)
   createdAt DateTime @default(now()) @map("created_at")
-
+  // 1:1 con User: la FK es única. Si se borra el usuario, se borra su perfil
+  userId Int?  @unique @map("user_id")
+  user   User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pedidos Pedido[] // 1:N
   @@map("clientes")
- }
+}
+// Entidad principal (Labs 1 y 2). price pasa a Decimal: dinero sin errores de redondeo
+model Carta {
+  id        Int           @id @default(autoincrement())
+  name      String        @unique @db.VarChar(80)
+  expansion String?       @db.VarChar(60)
+  rarity    String        @default("Common") @db.VarChar(40)
+  price     Decimal       @db.Decimal(10, 2)
+  stock     Int           @default(0)
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+  items     PedidoCarta[] // N:M con Pedido a través de PedidoCarta
+  @@index([expansion, rarity])
+  @@map("cartas")
+}
+// 1:N: un cliente tiene muchos pedidos; un pedido pertenece a un cliente
+model Pedido {
+  id        Int           @id @default(autoincrement())
+  fecha     DateTime      @default(now())
+  total     Decimal       @db.Decimal(10, 2)
+  estado    EstadoPedido  @default(PENDIENTE)
+  clienteId Int           @map("cliente_id")
+  cliente   Cliente       @relation(fields: [clienteId], references: [id], onDelete: Restrict)
+  items     PedidoCarta[]
+  @@index([clienteId])
+  @@index([estado, fecha])
+  @@map("pedidos")
+}
+// N:M explícita: la tabla intermedia guarda datos propios (cantidad y precio del momento)
+model PedidoCarta {
+  pedidoId       Int     @map("pedido_id")
+  cartaId        Int     @map("carta_id")
+  cantidad       Int
+  precioUnitario Decimal @map("precio_unitario") @db.Decimal(10, 2)
+  pedido         Pedido  @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  carta          Carta   @relation(fields: [cartaId], references: [id], onDelete: Restrict)
+  @@id([pedidoId, cartaId])
+  @@map("pedido_cartas")
+}
