@@ -1,22 +1,21 @@
 # Modelo ER del emprendimiento · Grupo G04
 
-# Grupo G04
-
-> Actividad 3 de la sesión 4. Es la base del `schema.prisma` del Lab 2 y de las relaciones del Lab 3.
+> Base del `schema.prisma` del Lab 3 (relaciones 1:1, 1:N y N:M).
 
 ## Diagrama
 
 ```mermaid
 erDiagram
-    CLIENTE ||--o{ PEDIDO : realiza
-    PEDIDO }o--o{ CARTA : contiene
-    CARTA {
+    USER ||--o| CLIENTE : "tiene perfil (1:1)"
+    CLIENTE ||--o{ PEDIDO : "realiza (1:N)"
+    PEDIDO ||--|{ PEDIDO_CARTA : contiene
+    CARTA ||--o{ PEDIDO_CARTA : "aparece en"
+    USER {
         int id PK
-        string name UK "VarChar(80)"
-        string expansion "opcional"
-        string rarity "default Common"
-        float price ">= 0"
-        int stock "default 0"
+        string email UK
+        string password "hash bcrypt"
+        string name
+        Role role "USER o ADMIN"
         datetime createdAt
     }
     CLIENTE {
@@ -25,32 +24,50 @@ erDiagram
         string email UK
         string telefono "opcional"
         string direccion "opcional"
-        datetime createdAt
+        int userId FK "único (1:1)"
+    }
+    CARTA {
+        int id PK
+        string name UK
+        string expansion "opcional"
+        string rarity "default Common"
+        decimal price "Decimal(10,2)"
+        int stock "recurso limitado"
     }
     PEDIDO {
         int id PK
         datetime fecha
-        float total ">= 0"
-        string estado "pendiente/pagado/enviado"
+        decimal total "Decimal(10,2)"
+        EstadoPedido estado "PENDIENTE, PAGADO, ENVIADO, CANCELADO"
         int clienteId FK
     }
+    PEDIDO_CARTA {
+        int pedidoId PK, FK
+        int cartaId PK, FK
+        int cantidad
+        decimal precioUnitario "precio del momento"
+    }
 ```
-## Entidades
 
-| Entidad | Atributos (tipo) | Clave primaria | Únicos / obligatorios / reglas |
-|---|---|---|---|
-| Carta | name(string), expansion (string), rarity (string), price (float), stock (int), createdAt (datetime) | id (int, autoincremental) | name único y obligatorio (>= 3 caracteres); price >= 0; stock entero >= 0; expansion opcional |
-|Cliente | nombre (string), email (string), telefono (string), direccion (string), createdAt (datetime) | id (int, autoincremental) | email único y obligatorio; nombre obligatorio; telefono y direccion opcionales | |
-| Pedido | fecha (datetime), total (float), estado (string), clienteId (int, FK) | id (int, autoincremental) | total >= 0; estado obligatorio; clienteId debe existir en Cliente |
+## Relaciones y onDelete
 
-## Relaciones
+| Relación | Cardinalidad | FK | onDelete | Por qué |
+|---|---|---|---|---|
+| User – Cliente | 1:1 | `clientes.user_id` (única) | Cascade | El perfil de cliente no tiene sentido sin su cuenta: si se borra el usuario, se borra su perfil. |
+| Cliente – Pedido | 1:N | `pedidos.cliente_id` | Restrict | No se borra un cliente que tiene compras: los pedidos son el historial de ventas de la tienda. |
+| Pedido – PedidoCarta | 1:N (lado de la N:M) | `pedido_cartas.pedido_id` | Cascade | Las líneas de un pedido no existen sin el pedido: si se borra el pedido, se borran sus líneas. |
+| Carta – PedidoCarta | 1:N (lado de la N:M) | `pedido_cartas.carta_id` | Restrict | No se borra una carta que ya se vendió (la API responde 409); para retirarla se deja con stock 0. |
 
-| Entidad A | Cardinalidad (1:1, 1:N, N:M) | Entidad B | Ejemplo en una frase |
-|---|---|---|---|
-| Cliente | 1:N | Pedido | Un cliente realiza muchos pedidos; cada pedido pertenece a un solo cliente |
-| Pedido | N:M | Carta | Un pedido contiene varias cartas y una carta puede estar en muchos pedidos (Lab 3: tabla intermedia). |
+La relación **Pedido N:M Carta** es explícita (tabla `pedido_cartas`) porque guarda datos propios: `cantidad` y `precioUnitario` (el precio de la carta al momento de la compra).
+
+## Mapeo
+
+- Enums: `Role` (USER, ADMIN) y `EstadoPedido` (PENDIENTE, PAGADO, ENVIADO, CANCELADO).
+- Dinero con `Decimal(10,2)`: `price`, `total` y `precioUnitario`. Fechas con `DateTime`: `fecha` y `createdAt`.
+- Índices: `@@index([clienteId])`, `@@index([estado, fecha])` y `@@index([expansion, rarity])`; clave compuesta `@@id([pedidoId, cartaId])`.
+- Nombres en snake_case con `@map` y `@@map` (`created_at`, `cliente_id`, `pedido_cartas`…).
 
 ## ¿Qué se implementa en cada laboratorio?
 
 - **Lab 2:** Carta y Cliente sin relaciones.
-- **Lab 3:** Pedido y las relaciones.
+- **Lab 3:** User, Pedido, PedidoCarta y todas las relaciones.
