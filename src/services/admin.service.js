@@ -1,20 +1,28 @@
-const {EstadoPedido}=require("@prisma/client");
+const { EstadoPedido } = require("@prisma/client");
 const prisma = require("../db/prisma");
 const HttpError = require("../utils/httpError");
+const { formatPedido } = require("./pedido.service");
 
 //consultas y acciones solo hechas por el admin
 
-const toInt = (value, def, max) =>{
-    const n = Number.parseInt(value, 10);
-    if(Number.isNaN(n) || n<1 ) return def;
-    return max ? Math.min(n, max) :n;
+const toInt = (value, def, max) => {
+  const n = Number.parseInt(value, 10);
+  if (Number.isNaN(n) || n < 1) return def;
+  return max ? Math.min(n, max) : n;
 };
 
 const parseEstado = (estado) => {
   if (estado === undefined) return undefined;
-  if (!Object.values(EstadoPedido).includes(estado))
+  const map = {
+    CANCELLED: "CANCELADO",
+    PENDING: "PENDIENTE",
+    PAID: "PAGADO",
+    SHIPPED: "ENVIADO",
+  };
+  const normalized = map[estado] || estado;
+  if (!Object.values(EstadoPedido).includes(normalized))
     throw new HttpError(400, `estado debe ser uno de: ${Object.values(EstadoPedido).join(", ")}`);
-  return estado;
+  return normalized;
 };
 
 const parseFecha = (value, campo) => {
@@ -41,20 +49,27 @@ const listPedidos = async ({ estado, desde, hasta, page, limit }) => {
       where,
       include: {
         cliente: { select: { id: true, nombre: true, email: true } },
-        items: { include: { carta: { select: { id: true, name: true } } } },
+        items: { include: { carta: { select: { id: true, name: true, price: true } } } },
       },
       orderBy: { fecha: "desc" },
       skip,
       take,
     }),
   ]);
-  return { page: pageNum, limit: take, total, pages: Math.ceil(total / take), data };
+  return { page: pageNum, limit: take, total, pages: Math.ceil(total / take), data: data.map(formatPedido) };
 };
 
 const updateEstado = async (id, estado) => {
   if (estado === undefined) throw new HttpError(400, "Envía el nuevo estado");
   // Si el id no existe, Prisma lanza P2025 y errorHandler responde 404
-  return prisma.pedido.update({ where: { id }, data: { estado: parseEstado(estado) } });
+  const updated = await prisma.pedido.update({
+    where: { id },
+    data: { estado: parseEstado(estado) },
+    include: {
+      items: { include: { carta: { select: { id: true, name: true, price: true } } } },
+    },
+  });
+  return formatPedido(updated);
 };
 
 // Consulta avanzada: agrupa los ítems por carta y suma las unidades vendidas (sin pedidos cancelados)
@@ -73,8 +88,10 @@ const topCartas = async (limit) => {
   const nombre = new Map(cartas.map((c) => [c.id, c.name]));
   return rows.map((r) => ({
     cartaId: r.cartaId,
+    productId: r.cartaId,
     name: nombre.get(r.cartaId),
     unidadesVendidas: r._sum.cantidad,
+    unitsSold: r._sum.cantidad,
   }));
 };
 

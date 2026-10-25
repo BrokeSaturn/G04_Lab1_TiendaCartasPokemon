@@ -441,7 +441,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"201 Created\", () => pm.response.to.have.status(201));\npm.collectionVariables.set(\"productId\", pm.response.json().id);\npm.test(\"price es Decimal (llega como texto)\", () => pm.expect(pm.response.json().price).to.eql(\"3.75\"));"
+                  "pm.test(\"201 Created\", () => pm.response.to.have.status(201));\npm.collectionVariables.set(\"productId\", pm.response.json().id);\npm.collectionVariables.set(\"cartaId\", pm.response.json().id);\npm.test(\"price es Decimal (llega como texto)\", () => pm.expect(pm.response.json().price).to.eql(\"3.75\"));"
                 ]
               }
             }
@@ -561,7 +561,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "// Segundo producto del seed para probar que el primero NO se descuenta\npm.sendRequest(pm.collectionVariables.get(\"baseUrl\") + \"/api/products\", (err, res) => {\n  pm.collectionVariables.set(\"productId2\", res.json().find((p) => p.name === \"Croissant\").id);\n});"
+                  "// Segundo producto del seed para probar que el primero NO se descuenta\npm.sendRequest(pm.collectionVariables.get(\"baseUrl\") + \"/api/cartas\", (err, res) => {\n  const list = res.json();\n  const card = Array.isArray(list) ? (list.find((p) => p.name === \"Charizard\") || list[0]) : null;\n  if (card) {\n    pm.collectionVariables.set(\"productId2\", card.id);\n    pm.collectionVariables.set(\"cartaId2\", card.id);\n  }\n});"
                 ]
               }
             }
@@ -586,7 +586,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"items\": [\n    { \n        \"cartaId\": {{cartaId2}}, \n        \"cantidad\": 999 \n    }\n  ]\n}",
+              "raw": "{\n  \"items\": [\n    { \n        \"cartaId\": {{cartaId}}, \n        \"cantidad\": 1 \n    },\n    { \n        \"cartaId\": {{cartaId2}}, \n        \"cantidad\": 999 \n    }\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -626,14 +626,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/cartas/{{cartaId2}}",
+              "raw": "{{baseUrl}}/api/cartas/{{productId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "cartas",
-                "{{cartaId2}}"
+                "{{productId}}"
               ]
             }
           },
@@ -1163,7 +1163,15 @@
       "value": ""
     },
     {
+      "key": "cartaId",
+      "value": ""
+    },
+    {
       "key": "productId2",
+      "value": ""
+    },
+    {
+      "key": "cartaId2",
       "value": ""
     },
     {

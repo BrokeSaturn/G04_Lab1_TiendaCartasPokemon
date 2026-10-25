@@ -9,4 +9,4 @@ router.post("/register", authController.register);
 router.post("/login", authController.login);
 router.get("/me", authenticateToken, authController.me); // ruta protegida
 
-modeule.exports = router;
+module.exports = router;
