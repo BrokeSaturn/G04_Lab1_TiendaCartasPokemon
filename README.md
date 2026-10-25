@@ -162,3 +162,132 @@ Flujo de una peticion: **ruta → controlador → servicio (Prisma) → PostgreS
 - Herramienta(s) usada(s): Claude y ChatGPT.
 - La usamos para consultar, depurar, explicar un errores: Se uso para consultar dudas sobre la configuracion de Prisma 7, resolver errores en las migraciones de PostgreSQL y organizar la estructura del documento.
 - Que verificamos o corregimos nosotros: Revisamos que el codigo cumpla con la arquitectura MVC solicitada, verificamos las validaciones en los servicios y probamos que todos los endpoints respondan correctamente en Postman.
+
+
+# Laboratorio 3 · Relaciones, autenticación y despliegue
+
+**Desarrollo Web Avanzada (A0R04) · ESPE · Unidad 1: Persistencia de datos y ORM**
+
+| Dato | Valor |
+|---|---|
+| Grupo | G04 |
+| Emprendimiento | Tienda online de cartas Pokémon |
+| Integrantes | 1. Jardel Maza <br> 2. Esteban Recalde <br> 3. Nicolás Zurita |
+| NRC | 36878 |
+| Fecha | 25/10/2026 |
+| URL Pública | https://<tu-url-de-railway>.up.railway.app |
+| Repositorio | https://github.com/BrokeSaturn/G04_Lab1_TiendaCartasPokemon |
+
+## Como ejecutar
+
+```bash
+npm install                                 # Instala dependencias
+cp .env.example .env                        # En Windows: copy .env.example .env (configurar JWT_SECRET)
+docker compose up -d                        # Levanta PostgreSQL 17 en Docker (opcional)
+npx prisma migrate dev                      # Aplica las migraciones a PostgreSQL
+npx prisma generate                         # Genera el cliente de Prisma
+npx prisma db seed                          # Carga los datos iniciales
+npm run dev                                 # http://localhost:3000
+```
+
+Importa en Postman `postman/G04_Lab3.postman_collection.json` y ejecuta **Run collection**.
+
+## Estructura MVC en capas
+
+```
+prisma/
+├─ schema.prisma             ← Definicion de modelos (User, Cliente, Carta, Pedido, DetallePedido)
+├─ seed.js                   ← Carga de datos iniciales con usuarios, cartas y pedidos de prueba
+└─ migrations/               ← Migraciones versionadas en SQL
+src/
+├─ app.js                    ← Arma la app: express.json, middlewares y prefijo /api
+├─ server.js                 ← Conecta Prisma a PostgreSQL y levanta el servidor
+├─ db/
+│  └─ prisma.js              ← Instancia del cliente de Prisma Client
+├─ routes/
+│  ├─ index.js               ← Archivo principal: monta cada recurso (/api/<entidad>)
+│  ├─ auth.routes.js         ← Autenticacion (/register, /login, /me)
+│  ├─ carta.routes.js        ← CRUD de cartas y reportes admin
+│  ├─ pedido.routes.js       ← Rutas protegidas de pedidos (/pedidos, /cancelar)
+│  └─ admin.routes.js        ← Rutas administrativas (/reportes/top-cartas)
+├─ controllers/
+│  ├─ auth.controller.js     ← Manejo de peticiones de registro, login y perfil
+│  ├─ carta.controller.js    ← Controladores del catalogo de cartas
+│  ├─ pedido.controller.js   ← Controladores de gestion y cancelacion de pedidos
+│  └─ admin.controller.js    ← Controladores de reportes del sistema
+├─ services/
+│  ├─ auth.service.js        ← Reglas de negocio de usuarios, hash de claves (bcrypt) y JWT
+│  ├─ carta.service.js       ← Reglas de negocio del catalogo
+│  ├─ pedido.service.js      ← Transacciones de pedidos ($transaction), stock y ROLLBACK
+│  └─ admin.service.js       ← Consultas agregadas de reportes
+├─ middlewares/
+│  ├─ auth.js                ← Validacion de token JWT y control de roles (authenticateToken, requireRole)
+│  ├─ logger.js              ← Registro de peticiones HTTP
+│  ├─ notFound.js            ← Manejo de ruta no encontrada (404)
+│  └─ errorHandler.js        ← Manejo global de errores (Prisma P2002 -> 409, P2025 -> 404)
+└─ utils/httpError.js        ← Clase personalizada de errores
+evidencias/
+├─ postman-local.png         ← Captura del Run Collection local exitoso (39/39)
+└─ railway-run.png           ← Captura del Run Collection ejecutado en la nube
+postman/
+├─ G04_Lab3.postman_collection.json ← Coleccion de Postman adaptada
+└─ Railway.postman_environment.json ← Entorno para pruebas en la nube
+```
+
+Flujo de una peticion: **ruta → middleware (JWT) → controlador → servicio (Prisma) → PostgreSQL** y de vuelta. El proyecto usa CommonJS (`require` / `module.exports`).
+
+## Usuarios de prueba (seed)
+
+| Rol | Correo Electrónico | Contraseña |
+|---|---|---|
+| ADMIN | admin@tiendapokemon.com | Admin123* |
+| USER | jardel@espe.com | Cliente123* |
+| USER | esteban@espe.com | Cliente123* |
+
+## Endpoints de la API
+
+| Verbo | Ruta | Accion | Rol Requerido | Exito | Errores |
+|---|---|---|---|---|---|
+| POST | /api/auth/register | Registrar usuario y cliente (1:1) | Público | 201 | 400, 409 |
+| POST | /api/auth/login | Autenticar usuario y emitir JWT | Público | 200 | 400, 401 |
+| GET | /api/auth/me | Obtener perfil del usuario autenticado | Autenticado | 200 | 401 |
+| GET | /api/cartas | Listar catalogo de cartas | Público | 200 | — |
+| GET | /api/cartas/:id | Ver una carta por ID | Público | 200 | 400, 404 |
+| POST | /api/cartas | Crear carta | ADMIN | 201 | 400, 401, 403, 409 |
+| PUT | /api/cartas/:id | Actualizar carta | ADMIN | 200 | 400, 401, 403, 404, 409 |
+| DELETE | /api/cartas/:id | Eliminar carta | ADMIN | 200 | 401, 403, 404 |
+| POST | /api/pedidos | Crear pedido (Transaccion de stock) | USER | 201 | 400, 401, 409 |
+| GET | /api/pedidos | Listar pedidos del usuario autenticado | USER | 200 | 401 |
+| PATCH | /api/pedidos/:id/cancelar | Cancelar pedido y devolver stock | USER | 200 | 401, 403, 404, 409 |
+| GET | /api/admin/reportes/top-cartas | Obtener top de cartas mas vendidas | ADMIN | 200 | 401, 403 |
+
+## Relaciones de la base de datos y comportamiento onDelete
+
+| Relacion | Tipo | Tablas Involucradas | Accion onDelete | Justificacion |
+|---|---|---|---|---|
+| Usuario - Cliente | 1:1 | `User` → `Cliente` | CASCADE | Al eliminar un usuario del sistema, su perfil de cliente asociado se elimina automaticamente. |
+| Cliente - Pedido | 1:N | `Cliente` → `Pedido` | RESTRICT | No se puede eliminar un cliente con historial de compras para preservar los registros contables. |
+| Pedido - DetallePedido | 1:N | `Pedido` → `DetallePedido` | CASCADE | Si se elimina un pedido, todos los detalles e items asociados se eliminan en cascada. |
+| Carta - DetallePedido | 1:N | `Carta` → `DetallePedido` | RESTRICT | No se permite eliminar una carta si ya forma parte de un pedido registrado. |
+
+## Validaciones del servicio
+
+1. El registro exige correo valido, contrasena de al menos 8 caracteres y nombre completo (400). Si el correo ya existe (`P2002`), retorna 409 Conflict.
+2. Al crear un pedido (`/api/pedidos`), se valida la disponibilidad de stock de cada carta mediante transacciones atómicas (`$transaction`).
+3. Si el stock es insuficiente para cumplir el pedido, la transaccion aplica un **ROLLBACK** automatico y responde con error HTTP 409.
+4. Al cancelar un pedido en estado `PENDIENTE`, el servicio devuelve atomicamente la cantidad de cartas compradas al stock disponible.
+5. Las rutas protegidas validan el token JWT pasado en la cabecera `Authorization: Bearer <token>`. Retorna 401 si el token es invalido/ausente y 403 si el rol del usuario no tiene permisos suficientes.
+
+## Aporte de cada integrante
+
+| Integrante | Que hizo (archivos / pasos) |
+|---|---|
+| Esteban Recalde | Sincronizo la rama `lab3`, configuro la conexion a PostgreSQL en Railway, aplico las migraciones de Prisma en la nube y gestiono el despliegue de la aplicacion en el entorno de produccion. |
+| Nicolas Zurita | Implemento los modulos de autenticacion (`auth.routes.js`, `auth.controller.js`, `auth.service.js`), el middleware de verificacion de tokens y roles JWT (`auth.js`), y el modulo de reportes administrativos (`admin.routes.js`, `admin.service.js`). |
+| Jardel Maza | Adapto la estructura del modulo de pedidos (`pedido.routes.js`, `pedido.controller.js`, `pedido.service.js`), la logica de transacciones con ROLLBACK de stock, actualizo la coleccion de Postman al dominio de cartas Pokemon, ejecuto las suites de pruebas generando las capturas de evidencia (`evidencias/postman-local.png` y `evidencias/railway-run.png`) y redacto la documentacion final en `README.md`. |
+
+## Declaracion de uso de IA
+
+- Herramienta(s) usada(s): Gemini.
+- La usamos para consultar, depurar, explicar un errores: Se uso para resolver errores de sintaxis y tipado en consultas complejas de Prisma `$transaction`, ajustar el manejo de errores en middlewares y adaptar las aserciones de pruebas en Postman al idioma español.
+- Que verificamos o corregimos nosotros: Verificamos la correcta ejecucion del flujo MVC en todas las capas, comprobamos que las transacciones atomicen adecuadamente los cambios en la base de datos y validamos el paso exitoso de las 39 pruebas tanto en entorno local como en Railway.
