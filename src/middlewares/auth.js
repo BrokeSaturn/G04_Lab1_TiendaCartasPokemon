@@ -16,8 +16,9 @@ const authenticateToken =(req, res, next)=>{
 
 //Control de roles
 const requireRole = (...roles) =>(req, res, next)=>{
-    if(!req.user || roles.includes(req.user.role))
+    if(!req.user || !roles.includes(req.user.role))
         return next(new HttpError(403, "No tienes permisos para esta acción"));
+    next();
 }
 
 module.exports = {authenticateToken, requireRole};

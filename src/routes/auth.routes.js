@@ -2,6 +2,7 @@ const {Router} = require("express");
 const authController = require("../controllers/auth.controller");
 const {authenticateToken}=require("../middlewares/auth");
 
+
 const router = Router();
 
 router.post("/register", authController.register);
