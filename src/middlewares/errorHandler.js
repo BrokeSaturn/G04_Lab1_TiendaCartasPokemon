@@ -9,6 +9,8 @@ const fromPrisma = (err) => {
       return { status: 409, message: `Ya existe un registro con ese valor único (${campo})` };
     }
     if (err.code === "P2025") return { status: 404, message: "Registro no encontrado" };
+    //onDelete: Restrict - para no borrar un registro utilizado por otros
+    if(err.code == "P2003") return{status: 409, message: "No se pueden eliminar registros relacionados"};
   }
   if (err instanceof Prisma.PrismaClientValidationError) return { status: 400, message: "Datos con tipo o formato inválido" };
   return null;
