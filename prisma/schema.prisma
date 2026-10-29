@@ -4,31 +4,39 @@
 generator client {
   provider = "prisma-client-js"
 }
+
 // Prisma 7: la URL no va aquí; está en prisma.config.ts
 datasource db {
   provider = "postgresql"
 }
+
 enum Role {
   USER
   ADMIN
 }
+
 enum EstadoPedido {
   PENDIENTE
   PAGADO
   ENVIADO
   CANCELADO
 }
+
 // Usuario que inicia sesión con JWT
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique @db.VarChar(120)
-  password  String // hash de bcrypt, nunca la clave en texto plano
-  name      String   @db.VarChar(100)
-  role      Role     @default(USER)
-  createdAt DateTime @default(now()) @map("created_at")
-  cliente   Cliente? // 1:1 → el lado sin FK
+  id            Int               @id @default(autoincrement())
+  email         String            @unique @db.VarChar(120)
+  password      String // hash de bcrypt, nunca la clave en texto plano
+  name          String            @db.VarChar(100)
+  role          Role              @default(USER)
+  createdAt     DateTime          @default(now()) @map("created_at")
+  cliente       Cliente? // 1:1 → el lado sin FK
+  resenas       Resena[] // Taller A: 1:N
+  cambiosEstado HistorialPedido[] // Taller C: 1:N (quién cambió el estado)
+
   @@map("users")
 }
+
 // Entidad del Lab 2, ahora relacionada
 model Cliente {
   id        Int      @id @default(autoincrement())
@@ -38,38 +46,47 @@ model Cliente {
   direccion String?  @db.VarChar(150)
   createdAt DateTime @default(now()) @map("created_at")
   // 1:1 con User: la FK es única. Si se borra el usuario, se borra su perfil
-  userId Int?  @unique @map("user_id")
-  user   User? @relation(fields: [userId], references: [id], onDelete: Cascade)
-  pedidos Pedido[] // 1:N
+  userId    Int?     @unique @map("user_id")
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pedidos   Pedido[] // 1:N
+
   @@map("clientes")
 }
+
 // Entidad principal (Labs 1 y 2). price pasa a Decimal: dinero sin errores de redondeo
 model Carta {
-  id        Int           @id @default(autoincrement())
-  name      String        @unique @db.VarChar(80)
-  expansion String?       @db.VarChar(60)
-  rarity    String        @default("Common") @db.VarChar(40)
-  price     Decimal       @db.Decimal(10, 2)
-  stock     Int           @default(0)
-  createdAt DateTime      @default(now()) @map("created_at")
-  updatedAt DateTime      @updatedAt @map("updated_at")
-  items     PedidoCarta[] // N:M con Pedido a través de PedidoCarta
+  id         Int           @id @default(autoincrement())
+  name       String        @unique @db.VarChar(80)
+  expansion  String?       @db.VarChar(60)
+  rarity     String        @default("Common") @db.VarChar(40)
+  price      Decimal       @db.Decimal(10, 2)
+  stock      Int           @default(0)
+  createdAt  DateTime      @default(now()) @map("created_at")
+  updatedAt  DateTime      @updatedAt @map("updated_at")
+  items      PedidoCarta[] // N:M con Pedido a través de PedidoCarta
+  resenas    Resena[] // Taller A: 1:N
+  categorias Categoria[] // Taller B: N:M implícita
+
   @@index([expansion, rarity])
   @@map("cartas")
 }
+
 // 1:N: un cliente tiene muchos pedidos; un pedido pertenece a un cliente
 model Pedido {
-  id        Int           @id @default(autoincrement())
-  fecha     DateTime      @default(now())
-  total     Decimal       @db.Decimal(10, 2)
-  estado    EstadoPedido  @default(PENDIENTE)
-  clienteId Int           @map("cliente_id")
-  cliente   Cliente       @relation(fields: [clienteId], references: [id], onDelete: Restrict)
+  id        Int               @id @default(autoincrement())
+  fecha     DateTime          @default(now())
+  total     Decimal           @db.Decimal(10, 2)
+  estado    EstadoPedido      @default(PENDIENTE)
+  clienteId Int               @map("cliente_id")
+  cliente   Cliente           @relation(fields: [clienteId], references: [id], onDelete: Restrict)
   items     PedidoCarta[]
+  historial HistorialPedido[] // Taller C: 1:N
+
   @@index([clienteId])
   @@index([estado, fecha])
   @@map("pedidos")
 }
+
 // N:M explícita: la tabla intermedia guarda datos propios (cantidad y precio del momento)
 model PedidoCarta {
   pedidoId       Int     @map("pedido_id")
@@ -78,6 +95,47 @@ model PedidoCarta {
   precioUnitario Decimal @map("precio_unitario") @db.Decimal(10, 2)
   pedido         Pedido  @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
   carta          Carta   @relation(fields: [cartaId], references: [id], onDelete: Restrict)
+
   @@id([pedidoId, cartaId])
   @@map("pedido_cartas")
+}
+
+// ===== Taller · Tarjeta A (Nicolás): reseñas, 1:N con User y con Carta =====
+model Resena {
+  id        Int      @id @default(autoincrement())
+  rating    Int      @db.SmallInt // 1 a 5 (se valida en el servicio)
+  comment   String?  @db.VarChar(300)
+  createdAt DateTime @default(now()) @map("created_at")
+  userId    Int      @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cartaId   Int      @map("carta_id")
+  carta     Carta    @relation(fields: [cartaId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, cartaId]) // una reseña por usuario y carta
+  @@map("resenas")
+}
+
+// ===== Taller · Tarjeta B (Esteban): categorías, N:M implícita con Carta =====
+model Categoria {
+  id     Int     @id @default(autoincrement())
+  name   String  @unique @db.VarChar(50)
+  cartas Carta[] // N:M implícita: Prisma crea la tabla intermedia _CartaToCategoria
+
+  @@map("categorias")
+}
+
+// ===== Taller · Tarjeta C (Jardel): historial de estados del pedido =====
+model HistorialPedido {
+  id             Int          @id @default(autoincrement())
+  pedidoId       Int          @map("pedido_id")
+  pedido         Pedido       @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  estadoAnterior EstadoPedido @map("estado_anterior")
+  estadoNuevo    EstadoPedido @map("estado_nuevo")
+  nota           String?      @db.VarChar(200)
+  cambiadoPorId  Int          @map("cambiado_por_id")
+  cambiadoPor    User         @relation(fields: [cambiadoPorId], references: [id], onDelete: Restrict)
+  createdAt      DateTime     @default(now()) @map("created_at")
+
+  @@index([pedidoId])
+  @@map("historial_pedidos")
 }
