@@ -27,6 +27,7 @@ model User {
   role      Role     @default(USER)
   createdAt DateTime @default(now()) @map("created_at")
   cliente   Cliente? // 1:1 → el lado sin FK
+  cambiosEstado HistorialPedido[]
   @@map("users")
 }
 // Entidad del Lab 2, ahora relacionada
@@ -66,6 +67,7 @@ model Pedido {
   clienteId Int           @map("cliente_id")
   cliente   Cliente       @relation(fields: [clienteId], references: [id], onDelete: Restrict)
   items     PedidoCarta[]
+  historial HistorialPedido[]
   @@index([clienteId])
   @@index([estado, fecha])
   @@map("pedidos")
@@ -80,4 +82,20 @@ model PedidoCarta {
   carta          Carta   @relation(fields: [cartaId], references: [id], onDelete: Restrict)
   @@id([pedidoId, cartaId])
   @@map("pedido_cartas")
+}
+
+// Auditoría de cada transición de estado realizada por un administrador
+model HistorialPedido {
+  id             Int          @id @default(autoincrement())
+  pedidoId       Int          @map("pedido_id")
+  estadoAnterior EstadoPedido @map("estado_anterior")
+  estadoNuevo    EstadoPedido @map("estado_nuevo")
+  nota           String?      @db.VarChar(200)
+  cambiadoPorId  Int          @map("cambiado_por_id")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  pedido         Pedido       @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  cambiadoPor    User         @relation(fields: [cambiadoPorId], references: [id], onDelete: Restrict)
+
+  @@index([pedidoId, id])
+  @@map("historial_pedidos")
 }

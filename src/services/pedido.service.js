@@ -143,4 +143,35 @@ const cancel = async (userId, pedidoId) => {
   return formatPedido(result);
 };
 
-module.exports = { create, listByUser, cancel, formatPedido };
+// Taller C: GET /api/pedidos/:id/historial (Dueño o ADMIN)
+const historial = async (user, pedidoId) => {
+  const pedido = await prisma.pedido.findUnique({
+    where: { id: pedidoId },
+    include: {
+      historial: {
+        orderBy: { id: "asc" }, // Orden cronológico
+        include: {
+          cambiadoPor: { select: { id: true, name: true } },
+        },
+      },
+    },
+  });
+
+  if (!pedido) throw new HttpError(404, "Pedido no encontrado");
+
+  if (user.role !== "ADMIN") {
+    const cliente = await clienteOf(user.id);
+    if (pedido.clienteId !== cliente.id) {
+      throw new HttpError(403, "El pedido no te pertenece");
+    }
+  }
+
+  return {
+    pedidoId: pedido.id,
+    estado: pedido.estado,
+    historial: pedido.historial,
+  };
+};
+
+
+module.exports = { create, listByUser, cancel, formatPedido, historial };

@@ -56,4 +56,14 @@ const cancel = async (req, res, next) => {
   }
 };
 
-module.exports = { create, listMine, cancel };
+// Taller C: GET /api/pedidos/:id/historial (200)
+const history = async (req, res, next) => {
+  try {
+    res.json(await pedidoService.historial(req.user, parseId(req)));
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+module.exports = { create, listMine, cancel, history };
