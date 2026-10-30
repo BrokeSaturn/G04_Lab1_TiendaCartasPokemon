@@ -9,6 +9,7 @@ async function main() {
   await prisma.cliente.deleteMany();
   await prisma.user.deleteMany();
   await prisma.carta.deleteMany();
+  await prisma.categoria.deleteMany();
   // 2. Catálogo
   await prisma.carta.createMany({
     data: [
@@ -17,6 +18,12 @@ async function main() {
       { name: "Mewtwo", expansion: "Base Set", rarity: "Rare Holo", price: 120, stock: 4 },
     ],
   });
+
+  // Taller B: categorías conectadas a las cartas (N:M implícita)  ← después del createMany
+  await prisma.categoria.create({ data: { name: "Fuego", cartas: { connect: [{ name: "Charizard" }] } } });
+  await prisma.categoria.create({ data: { name: "Eléctrico", cartas: { connect: [{ name: "Pikachu" }] } } });
+  await prisma.categoria.create({ data: { name: "Psíquico", cartas: { connect: [{ name: "Mewtwo" }] } } });
+
   // 3. Administrador (sin perfil de cliente) y usuarios con perfil 1:1 en una escritura anidada
   await prisma.user.create({
     data: {
