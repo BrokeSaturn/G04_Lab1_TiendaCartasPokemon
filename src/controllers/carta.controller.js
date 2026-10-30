@@ -68,4 +68,12 @@ const createMany = async (req, res, next) => {
   }
 };
 
-module.exports = { list, getById, create, update, remove, createMany };
+const search = async (req, res, next) => {
+  try {
+    res.json(await cartaservice.search(req.query));
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { list, getById, create, update, remove, createMany, search };
