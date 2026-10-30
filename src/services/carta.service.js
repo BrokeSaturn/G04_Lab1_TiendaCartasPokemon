@@ -1,3 +1,4 @@
+const { serializeJsonQuery } = require("@prisma/client/runtime/client");
 const prisma = require("../db/prisma");
 const HttpError = require("../utils/httpError");
 
@@ -73,4 +74,29 @@ const createMany = (items) =>
     return created; 
   });
 
-module.exports = { list, getById, create, update, remove, createMany };
+  // Taller B · búsqueda: filtros combinables, orden dinámico y paginación
+const SORTS = { price_asc: { price: "asc" }, price_desc: { price: "desc" }, name: { name: "asc" } };
+const search = async ({ q, category, min, max, sort, page, limit }) => {
+  if (sort !== undefined && !SORTS[sort])
+    throw new HttpError(400, "sort debe ser price_asc, price_desc o name");
+  const where = {};
+  if (q) where.name = { contains: q, mode: "insensitive" }; // sin distinguir mayúsculas
+  if (category) where.categorias = { some: { name: { equals: category, mode: "insensitive" } } };
+  if (min !== undefined || max !== undefined) where.price = {};
+  if (min !== undefined) where.price.gte = Number(min);
+  if (max !== undefined) where.price.lte = Number(max);
+  const pageNum = Math.max(Number.parseInt(page, 10) || 1, 1);
+  const take = Math.min(Math.max(Number.parseInt(limit, 10) || 10, 1), 50);
+  const [total, data] = await prisma.$transaction([
+    prisma.carta.count({ where }),
+    prisma.carta.findMany({
+      where,
+      include: { categorias: true },
+      orderBy: SORTS[sort] ?? { id: "asc" },
+      skip: (pageNum - 1) * take,
+      take,
+    }),
+  ]);
+  return { page: pageNum, limit: take, total, pages: Math.ceil(total / take), data };
+};
+module.exports = { list, getById, create, update, remove, createMany, search };
