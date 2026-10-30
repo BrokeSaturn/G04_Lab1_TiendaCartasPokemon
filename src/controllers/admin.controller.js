@@ -9,17 +9,18 @@ const listPedidos = async (req, res, next)=>{
         next(error);
     }
 };
+// Taller C: PATCH /api/admin/pedidos/:id/estado (200)
+const cambiarEstado = async (req, res, next) => {
+  try {
+    const id = Number.parseInt(req.params.id, 10);
+    if (Number.isNaN(id)) throw new HttpError(400, "El id debe ser numérico");
 
-//Patch
-const updateEstado = async(req,res,next)=>{
-    try {
-        const id = Number.parseInt(req.params.id, 10);
-        if (Number.isNaN(id)) throw new HttpError(400, "El id debe ser numérico");
-        res.json(await adminService.updateEstado(id, req.body?.estado));
-    } catch (error) {
-        next(error);
-    }
+    res.json(await adminService.cambiarEstado(id, req.body?.estado, req.body?.nota, req.user.id));
+  } catch (error) {
+    next(error);
+  }
 };
+
 
 //get
 
@@ -31,4 +32,4 @@ const topCartas = async(req,res,next)=>{
     }
 };
 
-module.exports ={listPedidos, updateEstado, topCartas};
+module.exports ={listPedidos, cambiarEstado, topCartas};

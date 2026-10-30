@@ -291,3 +291,17 @@ Flujo de una peticion: **ruta → middleware (JWT) → controlador → servicio 
 - Herramienta(s) usada(s): Gemini.
 - La usamos para consultar, depurar, explicar un errores: Se uso para resolver errores de sintaxis y tipado en consultas complejas de Prisma `$transaction`, ajustar el manejo de errores en middlewares y adaptar las aserciones de pruebas en Postman al idioma español.
 - Que verificamos o corregimos nosotros: Verificamos la correcta ejecucion del flujo MVC en todas las capas, comprobamos que las transacciones atomicen adecuadamente los cambios en la base de datos y validamos el paso exitoso de las 39 pruebas tanto en entorno local como en Railway.
+
+## Taller Nuevas funcionalidades
+
+## Taller Tarjeta C Flujo de estados con historial Jardel Maza
+
+| Método | Ruta | Rol | Body | Respuestas |
+|---|---|---|---|---|
+| PATCH | /api/admin/pedidos/:id/estado | ADMIN | `{ "estado": "...", "nota": "..." }` | 200, 400 (estado inválido), 401, 403, 404, 409 (transición no permitida) |
+| GET | /api/pedidos/:id/historial | Dueño o ADMIN | Ninguno | 200 (pedidoId, estado, historial), 401, 403 (no es el dueño), 404 |
+
+- **Transiciones:** `PENDIENTE` → `PAGADO` → `ENVIADO`; `PENDIENTE` → `PAGADO` → `CANCELADO` (al cancelar se devuelve el stock).
+- **409:** También se responde si el pedido cambió de estado mientras tanto. La `nota` admite máximo 200 caracteres.
+- **Modelo:** `HistorialPedido` 1:N con `Pedido` (`Cascade`: si se borra el pedido se borra su historial) y 1:N con `User` como `cambiadoPor` (`Restrict`: no se puede borrar un usuario con registros en historial). Posee `@@index([pedidoId])`.
+- El cambio de estado y el registro del historial se guardan juntos en una sola `$transaction`.
