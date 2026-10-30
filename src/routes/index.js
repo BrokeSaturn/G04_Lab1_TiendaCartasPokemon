@@ -3,7 +3,7 @@ const authRoutes = require("./auth.routes");
 const pedidoRoutes = require("./pedido.routes");
 const CartaRoutes = require("./carta.routes");
 const adminRoutes = require("./admin.routes");
-const resenaRoutes = require("./resena.routes");
+const resenaRoutes = require("./resenas.routes");
 
 // Archivo principal de rutas: cada recurso se monta en su propio prefijo
 const router = Router();
