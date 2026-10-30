@@ -8,7 +8,7 @@ router.use(authenticateToken, requireRole("ADMIN"));
 
 // Rutas para operaciones de administración
 router.get("/pedidos", adminController.listPedidos);
-router.patch("/pedidos/:id", adminController.updateEstado);
+router.patch("/pedidos/:id/estado", adminController.cambiarEstado);
 router.get("/reportes/top-cartas", adminController.topCartas);
 router.get("/reportes/top-products", adminController.topCartas);
 router.get("/cartas/top", adminController.topCartas);

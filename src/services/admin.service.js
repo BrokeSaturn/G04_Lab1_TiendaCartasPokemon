@@ -59,17 +59,79 @@ const listPedidos = async ({ estado, desde, hasta, page, limit }) => {
   return { page: pageNum, limit: take, total, pages: Math.ceil(total / take), data: data.map(formatPedido) };
 };
 
-const updateEstado = async (id, estado) => {
+// Taller C: Transiciones válidas
+const TRANSICIONES = {
+  PENDIENTE: ["PAGADO", "CANCELADO"],
+  PAGADO: ["ENVIADO", "CANCELADO"],
+  ENVIADO: [],
+  CANCELADO: [],
+};
+
+// TRANSACCIÓN: el cambio de estado y el registro en el historial se guardan juntos o ninguno
+const cambiarEstado = async (pedidoId, estado, nota, adminId) => {
   if (estado === undefined) throw new HttpError(400, "Envía el nuevo estado");
-  // Si el id no existe, Prisma lanza P2025 y errorHandler responde 404
-  const updated = await prisma.pedido.update({
-    where: { id },
-    data: { estado: parseEstado(estado) },
-    include: {
-      items: { include: { carta: { select: { id: true, name: true, price: true } } } },
-    },
+  
+  const nuevo = parseEstado(estado); // 400 si no es un estado válido
+
+  if (nota !== undefined && (typeof nota !== "string" || nota.length > 200)) {
+    throw new HttpError(400, "nota debe ser texto de máximo 200 caracteres");
+  }
+
+  const result = await prisma.$transaction(async (tx) => {
+    const pedido = await tx.pedido.findUnique({
+      where: { id: pedidoId },
+      include: { items: true },
+    });
+
+    if (!pedido) throw new HttpError(404, "Pedido no encontrado");
+
+    if (!TRANSICIONES[pedido.estado].includes(nuevo)) {
+      throw new HttpError(409, `Transición no permitida: ${pedido.estado} -> ${nuevo}`);
+    }
+
+    // updateMany condicionado al estado que leímos: control de concurrencia
+    const { count } = await tx.pedido.updateMany({
+      where: { id: pedidoId, estado: pedido.estado },
+      data: { estado: nuevo },
+    });
+
+    if (count === 0) {
+      throw new HttpError(409, "El pedido cambió de estado mientras tanto"); // ROLLBACK
+    }
+
+    // Si se cancela, se devuelve el stock de cada carta
+    if (nuevo === "CANCELADO") {
+      for (const it of pedido.items) {
+        await tx.carta.update({
+          where: { id: it.cartaId },
+          data: { stock: { increment: it.cantidad } },
+        });
+      }
+    }
+
+    await tx.historialPedido.create({
+      data: {
+        pedidoId,
+        estadoAnterior: pedido.estado,
+        estadoNuevo: nuevo,
+        nota,
+        cambiadoPorId: adminId,
+      },
+    });
+
+    return tx.pedido.findUnique({
+      where: { id: pedidoId },
+      include: {
+        items: {
+          include: {
+            carta: { select: { id: true, name: true, price: true } },
+          },
+        },
+      },
+    });
   });
-  return formatPedido(updated);
+
+  return formatPedido(result);
 };
 
 // Consulta avanzada: agrupa los ítems por carta y suma las unidades vendidas (sin pedidos cancelados)
@@ -95,4 +157,4 @@ const topCartas = async (limit) => {
   }));
 };
 
-module.exports = { listPedidos, updateEstado, topCartas };
+module.exports = { listPedidos, cambiarEstado, topCartas };
