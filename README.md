@@ -294,6 +294,29 @@ Flujo de una peticion: **ruta → middleware (JWT) → controlador → servicio 
 
 ## Taller Nuevas funcionalidades
 
+## Taller Tarjeta A Reseñas Nicolás Zurita
+
+| Método | Ruta | Rol | Body | Respuestas |
+|--------|------|-----|------|------------|
+| POST | /api/cartas/:id/resenas | Autenticado | { rating: 1-5, comment? } | 201 · 400 rating o comment · 401 · 404 carta · 409 ya reseñó |
+| GET | /api/cartas/:id/resenas | Público | — (query: page, limit) | 200 { cartaId, average, total, page, limit, pages, data } · 404 |
+| DELETE | /api/resenas/:id | Autor o ADMIN | — | 204 · 401 sin token · 403 no es el autor · 404 |
+
+Modelo: Resena (1:N con User y 1:N con Carta), @@unique([userId, cartaId]): una sola reseña por usuario y carta.
+comment admite máximo 300 caracteres.
+onDelete Cascade en ambos lados porque una reseña no tiene sentido si se borra su autor o su carta.
+
+## Taller Tarjeta B Categorías y búsqueda Esteban Recalde
+
+| Método | Ruta | Rol | Body | Respuestas |
+|--------|------|-----|------|------------|
+| POST | /api/categorias | ADMIN | { name } | 201 · 400 name vacío · 401 sin token · 403 no ADMIN · 409 duplicada |
+| GET | /api/categorias | Público | — | 200 [ { id, name, _count: { cartas } } ] |
+| PUT | /api/cartas/:id/categorias | ADMIN | { categoriaIds: [1, 2] } | 200 · 400 no es arreglo de enteros · 401 · 403 · 404 carta o categoría |
+| GET | /api/cartas/search | Público | — (query: q, category, min, max, sort, page, limit) | 200 { page, limit, total, pages, data } · 400 sort |
+
+Modelo: Categoria N:M implícita con Carta (Prisma crea la tabla _CartaToCategoria porque no guarda datos propios),
+name @unique. sort acepta price_asc, price_desc o name. /search se declara antes de /:id.
 ## Taller Tarjeta C Flujo de estados con historial Jardel Maza
 
 | Método | Ruta | Rol | Body | Respuestas |
