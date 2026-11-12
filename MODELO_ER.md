@@ -71,3 +71,16 @@ La relación **Pedido N:M Carta** es explícita (tabla `pedido_cartas`) porque g
 
 - **Lab 2:** Carta y Cliente sin relaciones.
 - **Lab 3:** User, Pedido, PedidoCarta y todas las relaciones.
+
+# Taller · Nuevas funcionalidades
+## Taller · Tarjeta B · Categorías y búsqueda · Esteban Recalde
+| Método | Ruta | Rol | Body | Respuestas |
+|--------|------|-----|------|------------|
+| POST | /api/categorias | ADMIN | { name } | 201 · 400 name vacío · 401 sin token · 403 no ADMIN · 409 duplicada |
+| GET | /api/categorias | Público | — | 200 [ { id, name, _count: { cartas } } ] |
+| PUT | /api/cartas/:id/categorias | ADMIN | { categoriaIds: [1, 2] } | 200 · 400 no es arreglo de enteros · 401 · 403 · 404 carta o categoría |
+| GET | /api/cartas/search | Público | — (query: q, category, min, max, sort, page, limit) | 200 { page, limit, total, pages, data } · 400 sort |
+Modelo: Categoria N:M implícita con Carta (Prisma crea la tabla _CartaToCategoria porque no guarda datos propios),
+name @unique. sort acepta price_asc, price_desc o name. /search se declara antes de /:id.
+## Taller · Tarjeta A · Reseñas · Nicolás Zurita
+## Taller · Tarjeta C · Flujo de estados con historial · Jardel Maza
