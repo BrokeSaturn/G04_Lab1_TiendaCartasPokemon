@@ -18,6 +18,15 @@ const fromPrisma = (err) => {
 
 // Manejador de errores: 4 parámetros. Responde siempre en JSON.
 const errorHandler = (err, req, res, next) => {
+  // Mongoose: ValidationError → 400 con un mensaje por campo
+  if (err.name === "ValidationError") {
+    const errors = Object.values(err.errors).map((e) => ({ campo: e.path, mensaje: e.message }));
+    return res.status(400).json({ error: "Datos inválidos", errors });
+  }
+  // Mongoose: _id con formato incorrecto
+  if (err.name === "CastError") {
+    return res.status(400).json({ error: `Valor inválido para ${err.path}` });
+  }
   const mapped = fromPrisma(err);
   // JSON mal formado en el body → 400
   const status = mapped?.status ?? (err.type === "entity.parse.failed" ? 400 : err.status || 500);
