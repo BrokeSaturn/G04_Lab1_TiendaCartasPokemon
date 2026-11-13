@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Laboratorio 1-3 · Desarrollo Web Avanzado · Mini-API MVC con CRUD para el emprendimiento del grupo",
   "main": "src/server.js",
-"scripts": {
+  "scripts": {
     "dev": "node --watch src/server.js",
     "start": "prisma migrate deploy && node src/server.js",
     "postinstall": "prisma generate",
@@ -22,7 +22,9 @@
     "dotenv": "^16.4.5",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.3",
+    "mongoose": "9.11.4",
     "pg": "8.23.1",
-    "prisma": "7.10.1"
+    "prisma": "7.10.1",
+    "validator": "13.15.35"
   }
 }

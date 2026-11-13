@@ -1,0 +1,136 @@
+{
+  "info": {
+    "name": "GXX_LabU2_Hito3",
+    "description": "Laboratorio U2 · Hito 3. Cambien la variable recurso, los cuerpos y completen las pruebas.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 · POST válido → 201",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"201 Created\", () => pm.response.to.have.status(201));",
+              "const r = pm.response.json();",
+              "pm.test(\"Tiene _id de MongoDB\", () => pm.expect(r._id).to.match(/^[a-f0-9]{24}$/));",
+              "// Agreguen: el virtual aparece en la respuesta y el pre(\"validate\") cambió el documento"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"campo\": \"CAMBIEN ESTE CUERPO POR UN DOCUMENTO VÁLIDO\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/{{recurso}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "{{recurso}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "02 · POST vacío → 400 con mensajes de required",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"400 Bad Request\", () => pm.response.to.have.status(400));",
+              "pm.test(\"Trae un mensaje por campo\", () => pm.expect(pm.response.json().errors).to.be.an(\"array\").that.is.not.empty);",
+              "// Agreguen: los mensajes exactos de sus campos obligatorios"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/{{recurso}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "{{recurso}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "03 · POST inválido → 400 (enum, rango, match, validación propia)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"400 Bad Request\", () => pm.response.to.have.status(400));",
+              "// Agreguen: el mensaje de su validación propia y de al menos otra regla"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"campo\": \"CAMBIEN ESTE CUERPO POR UNO QUE ROMPA SUS VALIDACIONES\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/{{recurso}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "{{recurso}}"
+          ]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "recurso",
+      "value": "<recurso>"
+    }
+  ]
+}

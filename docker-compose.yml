@@ -1,5 +1,5 @@
-# PostgreSQL 17 para el laboratorio (opcional si ya lo instalaste en tu computadora)
-# Levantar: docker compose up -d   ·   Detener: docker compose down
+# PostgreSQL 17 (opcional si ya lo instalaste en tu computadora) y MongoDB 8 (Unidad 2)
+# Solo MongoDB: docker compose up -d mongo   ·   Detener: docker compose down
 services:
   postgres:
     image: postgres:17-alpine
@@ -8,11 +8,24 @@ services:
     environment:
       POSTGRES_USER: espe_user
       POSTGRES_PASSWORD: espe_password
-      POSTGRES_DB: espe_db
+      POSTGRES_DB: grupo04
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  mongo:
+    image: mongo:8
+    container_name: g04-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: espe_user
+      MONGO_INITDB_ROOT_PASSWORD: espe_password
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
 volumes:
   postgres_data:
+  mongo_data:
