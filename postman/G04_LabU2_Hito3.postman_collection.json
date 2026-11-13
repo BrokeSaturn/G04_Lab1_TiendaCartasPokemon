@@ -1,8 +1,11 @@
 {
   "info": {
-    "name": "GXX_LabU2_Hito3",
+    "_postman_id": "b54f865b-902d-4b05-afbf-3f3001f4ccd2",
+    "name": "G04_LabU2_Hito3",
     "description": "Laboratorio U2 · Hito 3. Cambien la variable recurso, los cuerpos y completen las pruebas.",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "58684254",
+    "_collection_link": "https://go.postman.co/collection/58684254-b54f865b-902d-4b05-afbf-3f3001f4ccd2?source=collection_link"
   },
   "item": [
     {
@@ -13,10 +16,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"201 Created\", () => pm.response.to.have.status(201));",
-              "const r = pm.response.json();",
-              "pm.test(\"Tiene _id de MongoDB\", () => pm.expect(r._id).to.match(/^[a-f0-9]{24}$/));",
-              "// Agreguen: el virtual aparece en la respuesta y el pre(\"validate\") cambió el documento"
+              "pm.test(\"201 Created\", () => pm.response.to.have.status(201));\nconst r = pm.response.json();\npm.test(\"Tiene _id de MongoDB\", () => pm.expect(r._id).to.match(/^[a-f0-9]{24}$/));\npm.test(\"Trae el virtual resumen\", () => pm.expect(r.resumen).to.eql(\"Charizard 4/102 - 1 ataque(s)\"));\npm.test(\"pre(validate) creó el slug\", () => pm.expect(r.slug).to.eql(\"charizard-4-102\"));\npm.test(\"pre(validate) normalizó los tipos\", () => pm.expect(r.tipos).to.eql([\"fuego\"]));"
             ]
           }
         }
@@ -31,7 +31,12 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"campo\": \"CAMBIEN ESTE CUERPO POR UN DOCUMENTO VÁLIDO\"\n}"
+          "raw": "{\n  \"cartaId\": 1,\n  \"nombre\": \"  Charizard  \",\n  \"numero\": \"4/102\",\n  \"supertipo\": \"pokemon\",\n  \"hp\": 120,\n  \"tipos\": [\" Fuego \"],\n  \"expansion\": \"BS\",\n  \"ataques\": [\n    { \"nombre\": \"Giro Fuego\", \"danio\": 100, \"costo\": [\"fuego\", \"fuego\", \"fuego\", \"fuego\"] }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "text"
+            }
+          }
         },
         "url": {
           "raw": "{{baseUrl}}/api/{{recurso}}",
@@ -43,7 +48,8 @@
             "{{recurso}}"
           ]
         }
-      }
+      },
+      "response": []
     },
     {
       "name": "02 · POST vacío → 400 con mensajes de required",
@@ -53,9 +59,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"400 Bad Request\", () => pm.response.to.have.status(400));",
-              "pm.test(\"Trae un mensaje por campo\", () => pm.expect(pm.response.json().errors).to.be.an(\"array\").that.is.not.empty);",
-              "// Agreguen: los mensajes exactos de sus campos obligatorios"
+              "pm.test(\"400 Bad Request\", () => pm.response.to.have.status(400));\npm.test(\"Trae un mensaje por campo\", () => pm.expect(pm.response.json().errors).to.be.an(\"array\").that.is.not.empty);\nconst msgs = pm.response.json().errors.map((e) => e.mensaje);\npm.test(\"Mensajes de los required\", () => {\n  pm.expect(msgs).to.include(\"El nombre es obligatorio\");\n  pm.expect(msgs).to.include(\"El supertipo es obligatorio\");\n  pm.expect(msgs).to.include(\"El número de la carta es obligatorio\");\n});"
             ]
           }
         }
@@ -70,7 +74,12 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{}"
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "text"
+            }
+          }
         },
         "url": {
           "raw": "{{baseUrl}}/api/{{recurso}}",
@@ -82,7 +91,8 @@
             "{{recurso}}"
           ]
         }
-      }
+      },
+      "response": []
     },
     {
       "name": "03 · POST inválido → 400 (enum, rango, match, validación propia)",
@@ -92,8 +102,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"400 Bad Request\", () => pm.response.to.have.status(400));",
-              "// Agreguen: el mensaje de su validación propia y de al menos otra regla"
+              "pm.test(\"400 Bad Request\", () => pm.response.to.have.status(400));\nconst msgs = pm.response.json().errors.map((e) => e.mensaje);\npm.test(\"Validación propia (HP múltiplo de 10)\", () => pm.expect(msgs).to.include(\"El HP 55 debe ser múltiplo de 10\"));\npm.test(\"match del número\", () => pm.expect(msgs).to.include(\"El número debe tener el formato 4/102\"));\npm.test(\"enum del supertipo\", () => pm.expect(msgs).to.include(\"El supertipo legendario no es válido (pokemon, entrenador o energia)\"));"
             ]
           }
         }
@@ -108,7 +117,12 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"campo\": \"CAMBIEN ESTE CUERPO POR UNO QUE ROMPA SUS VALIDACIONES\"\n}"
+          "raw": "{\n  \"cartaId\": 2,\n  \"nombre\": \"Pikachu\",\n  \"numero\": \"60-64\",\n  \"supertipo\": \"legendario\",\n  \"hp\": 55\n}",
+          "options": {
+            "raw": {
+              "language": "text"
+            }
+          }
         },
         "url": {
           "raw": "{{baseUrl}}/api/{{recurso}}",
@@ -120,7 +134,8 @@
             "{{recurso}}"
           ]
         }
-      }
+      },
+      "response": []
     }
   ],
   "variable": [

@@ -328,3 +328,76 @@ name @unique. sort acepta price_asc, price_desc o name. /search se declara antes
 - **409:** También se responde si el pedido cambió de estado mientras tanto. La `nota` admite máximo 200 caracteres.
 - **Modelo:** `HistorialPedido` 1:N con `Pedido` (`Cascade`: si se borra el pedido se borra su historial) y 1:N con `User` como `cambiadoPor` (`Restrict`: no se puede borrar un usuario con registros en historial). Posee `@@index([pedidoId])`.
 - El cambio de estado y el registro del historial se guardan juntos en una sola `$transaction`.
+
+## Unidad 2 – MongoDB
+
+En esta unidad se integra **MongoDB 8** junto con **Mongoose 9.11.4** dentro del mismo repositorio, manteniendo intacta la arquitectura relacional de **PostgreSQL + Prisma** (sin alterar `schema.prisma` ni las migraciones existentes). 
+
+Para esta implementación se eligió la colección documental **`fichas`**, diseñada para almacenar las especificaciones técnicas de cada carta Pokémon (HP, tipos, ataques embebidos y efecto), cuya estructura varía dinámicamente según su supertipo (`pokemon`, `entrenador`, `energia`). La vinculación con PostgreSQL se realiza únicamente mediante referencia lógica a través del campo `cartaId`, evitando duplicar datos transaccionales como precio o stock.
+
+---
+
+## 1. Ejecución en entorno local
+
+1. **Configurar variables de entorno:**
+   Asegúrate de incluir la cadena de conexión en tu archivo `.env` local (se especifica `authSource=admin` porque el usuario root `espe_user` del contenedor se autentica contra dicha base):
+   ```env
+   MONGODB_URI="mongodb://espe_user:espe_password@localhost:27017/tiendapokemon?authSource=admin"
+   ```
+
+2. **Instalar dependencias e iniciar la API:**
+   ```bash
+   npm install
+   npm install -E mongoose@9.11.4 validator@13.15.35
+   npm run dev
+   ```
+   * **Comportamiento esperado:** Si ambas bases de datos conectan con éxito, la terminal mostrará `PostgreSQL y MongoDB conectados`. Si MongoDB no está disponible, `connectMongo` lanza una excepción y la aplicación detiene su ejecución (`No se pudo iniciar la API`) sin llamar a `app.listen()`.
+
+---
+
+## 2. Endpoints de la Unidad 2 (`/api/fichas`)
+
+| Método | Endpoint | Descripción | Códigos de Estado |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/fichas` | Lista todas las fichas técnicas almacenadas en MongoDB, incluyendo el campo virtual `resumen`. | `200 OK` |
+| `POST` | `/api/fichas` | Valida mediante Mongoose y registra una nueva ficha técnica en la colección `fichas`. | `201 Created` / `400 Bad Request` |
+
+## 3. Arquitectura en Capas y Middlewares
+
+El proyecto mantiene una separación estricta de responsabilidades para el nuevo recurso:
+
+1. **Modelo (`src/models/ficha.model.js`):** Define el esquema de Mongoose (`fichaSchema`), subdocumentos embebidos (`ataqueSchema`), validaciones declarativas y personalizadas, el campo virtual `resumen` y el middleware de documento. Ocupa el equivalente a `schema.prisma` + `PrismaClient`, sin reemplazar la capa de servicios.
+2. **Servicio (`src/services/ficha.service.js`):** Encapsula las operaciones de acceso a datos (`Ficha.find()` y `Ficha.create(data)`).
+3. **Controlador (`src/controllers/ficha.controller.js`):** Gestiona las peticiones HTTP (`list` y `create`), delega la lógica al servicio y propaga errores mediante `next(err)`.
+4. **Enrutamiento (`src/routes/ficha.routes.js` y `src/routes/index.js`):** Expone las rutas `GET /` y `POST /` bajo el prefijo `/api/fichas`.
+
+#### Ubicación y función de los Middlewares
+
+* **Middlewares de Express (`src/middlewares/`):**
+  Operan sobre el ciclo de petición-respuesta `(req, res, next)` (`logger.js`, `notFound.js`, `auth.js` y `errorHandler.js`). En esta unidad se amplió **`errorHandler.js`** para interceptar las excepciones `ValidationError` y `CastError` lanzadas por Mongoose, transformándolas en respuestas HTTP `400 Bad Request` estructuradas.
+* **Middleware de Mongoose (`src/models/ficha.model.js`):**
+  Se implementó el hook **`fichaSchema.pre("validate")`**, el cual actúa directamente sobre la instancia del documento (`this`) antes de ejecutar las validaciones del esquema (sin recibir el parámetro `next`, acorde a la sintaxis de Mongoose 9). Su función es construir automáticamente el `slug` (ej. `charizard-4-102`) a partir del nombre y número de carta, además de sanitizar el arreglo `tipos` aplicando `.trim().toLowerCase()`.
+
+---
+
+## 4. Entregables y Evidencias de la Unidad 2
+
+* **`docs/u2/hito1.md`:** Justificación de selección NoSQL (comparativa entre modelos Documental, Clave-Valor y Columnar) y delimitación de datos entre PostgreSQL y MongoDB.
+* **`docs/u2/hito2.md`:** Análisis de *workload* (patrones de lectura/escritura), matriz de decisión para embeber (`ataques`) vs. referenciar (`expansiones`, `cartaId`) y diagrama Entidad-Relación en Mermaid.
+* **`docs/u2/grupo4.mongodb.js`:** Playground ejecutable en VS Code sobre la base `tiendapokemon_lab` con validación nativa `$jsonSchema` (enum, rango y arreglo), pruebas de inserción válidas/rechazadas y agregación con `$lookup` + `$unwind`.
+* **`postman/G04_LabU2_Hito3.postman_collection.json`:** Colección de Postman con pruebas automatizadas (`pm.test`) para creación exitosa (`201`), validación de campos obligatorios (`400`) y validación de formatos/reglas de negocio (`400`).
+* **`docs/u2/postman_hito3.png`:** Evidencia de ejecución exitosa (en verde) de la colección de Postman.
+* **`docs/u2/compass_fichas.png`:** Evidencia en MongoDB Compass de los documentos persistidos en `tiendapokemon.fichas`.
+
+---
+---
+## 5. Consideraciones Finales
+
+* **Conclusión:** La implementación de MongoDB como base de datos NoSQL permitió una mayor flexibilidad en la gestión de los datos de las fichas de cartas, facilitando la inclusión de información adicional sin necesidad de modificar la estructura del esquema.
+* **Lecciones aprendidas:** Se aprendió la importancia de planificar cuidadosamente el diseño del esquema y las validaciones antes de implementar el sistema, así como la necesidad de mantener una comunicación efectiva entre los miembros del equipo para garantizar la calidad del código y la coherencia en la documentación.
+
+## 6. Declaración de uso de Inteligencia Artificial
+
+* **Herramienta utilizada:** Claude .
+* **Alcance y propósito:** Asistencia en la creacion de nuevos archivos, verificación de sintaxis para reglas de validación en `$jsonSchema` y Mongoose 9, y estructuración de aserciones de prueba en Postman.
+* **Validación realizada por el grupo:** Todos los integrantes verificaron y ejecutaron de forma manual el levantamiento de contenedores en Docker, la conexión simultánea de PostgreSQL y MongoDB al iniciar la API, el correcto funcionamiento de los endpoints y middlewares mediante Postman, y la persistencia real de los datos en MongoDB Compass.
