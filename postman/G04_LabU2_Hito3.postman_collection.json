@@ -1,11 +1,10 @@
 {
   "info": {
-    "_postman_id": "b54f865b-902d-4b05-afbf-3f3001f4ccd2",
+    "_postman_id": "c0b3eb29-eda2-458e-932a-59167779eec9",
     "name": "G04_LabU2_Hito3",
     "description": "Laboratorio U2 · Hito 3. Cambien la variable recurso, los cuerpos y completen las pruebas.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "58684254",
-    "_collection_link": "https://go.postman.co/collection/58684254-b54f865b-902d-4b05-afbf-3f3001f4ccd2?source=collection_link"
+    "_exporter_id": "58684324"
   },
   "item": [
     {

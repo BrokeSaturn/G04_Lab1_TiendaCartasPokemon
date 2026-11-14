@@ -7,8 +7,7 @@ const list = async (req, res, next) => {
         next(err);
     }
 };
-// POST /api/fichas → 201 con el documento (y el virtual). Si falla la validación, errorHandler responde
-400
+// POST /api/fichas → 201 con el documento (y el virtual). Si falla la validación, errorHandler responde 400
 const create = async (req, res, next) => {
     try {
         const ficha = await fichaService.create(req.body ?? {});
